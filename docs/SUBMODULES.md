@@ -10,6 +10,14 @@ All submodules are located in the `modules/` directory:
   - Path: `modules/superpowers`
   - Repository: https://github.com/natea/superpowers
 
+- **anthropic-claude-skills** - Official Anthropic example and document skills
+  - Path: `modules/anthropic-claude-skills`
+  - Repository: https://github.com/natea/anthropic-claude-skills
+
+- **claude-code-by-agents** - Multi-agent workspace with Electron desktop app
+  - Path: `modules/claude-code-by-agents`
+  - Repository: https://github.com/natea/claude-code-by-agents
+
 - **mcp-getgather** - MCP server for gathering context
   - Path: `modules/mcp-getgather`
   - Repository: https://github.com/natea/mcp-getgather

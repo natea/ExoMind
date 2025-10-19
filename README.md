@@ -47,6 +47,7 @@ git submodule update --init --recursive
 **Included Submodules:**
 - `modules/superpowers` - Enhanced skills for TDD, brainstorming, debugging
 - `modules/anthropic-claude-skills` - Official Anthropic skills (documents, creative, dev)
+- `modules/claude-code-by-agents` - Multi-agent workspace with web UI for coordination
 - `modules/mcp-getgather` - Context gathering and web scraping
 - `modules/Skill_Seekers` - Auto-generate skills from documentation
 - `modules/life-os` - Personal productivity and life management
@@ -426,7 +427,7 @@ uvx voice-mode service kokoro status
 
 ## 📚 Included Submodules
 
-ExoMind includes five specialized modules in the `modules/` directory:
+ExoMind includes six specialized modules in the `modules/` directory:
 
 ### [Superpowers](https://github.com/natea/superpowers)
 Enhanced Claude Code skills for systematic development workflows.
@@ -545,6 +546,99 @@ Official example skills from Anthropic demonstrating Claude's skills system capa
 ```
 
 See [modules/anthropic-claude-skills/README.md](modules/anthropic-claude-skills/README.md) for full documentation.
+
+### [Claude Code by Agents](https://github.com/natea/claude-code-by-agents)
+Multi-agent workspace with Electron desktop app for collaborative development and task coordination.
+
+**Key Features:**
+- **Electron Desktop App** - Native app for Windows, macOS, and Linux
+- **Multi-Agent Orchestration** - Coordinate multiple specialized agents
+- **@agent-name Mentions** - Direct task routing to specific agents
+- **Local & Remote Agents** - Mix local and cloud-based agent instances
+- **No API Keys Required** - Uses your Claude CLI authentication
+- **Beautiful Web UI** - Agent hub, detail views, and orchestrator chat
+- **Session Continuity** - Maintains conversation context per agent
+- **Agent Isolation** - Separate working directories and contexts per agent
+
+**Architecture:**
+- **Agent Hub Page** - Grid view of all configured agents with status
+- **Agent Detail View** - Individual chat sessions (Current Chat + History tabs)
+- **Orchestrator Chat** - Multi-agent planning and coordination
+- **Remote Agent Support** - Connect agents running on different machines
+- **File-Based Coordination** - Automatic dependency management
+
+**Quick Start:**
+
+```bash
+cd modules/claude-code-by-agents
+
+# Option 1: Download pre-built desktop app
+# Windows: claude-code-webui-windows-x64.exe
+# macOS Intel: claude-code-webui-macos-x64
+# macOS ARM: claude-code-webui-macos-arm64
+# Linux: claude-code-webui-linux-{x64,arm64}
+
+# Start backend service (required for desktop app)
+cd backend && deno task dev  # Runs on localhost:8080
+
+# Option 2: Run from source
+npm install
+cd backend && deno task dev        # Terminal 1: Backend
+cd frontend && npm run dev         # Terminal 2: Frontend
+
+# Option 3: Build desktop app
+npm run dist:mac    # macOS DMG
+npm run dist:win    # Windows installer
+npm run dist:linux  # Linux AppImage
+```
+
+**Usage Examples:**
+
+```bash
+# Single agent - direct execution, no orchestration overhead
+@api-agent add user authentication
+
+# Multi-agent - orchestrator coordinates automatically
+"Create full auth system with frontend and backend"
+
+# Remote agent on different machine
+@mac-mini-agent run browser tests on Safari
+
+# Mix local and remote agents
+"@backend-agent create API, @frontend-agent build UI, @test-agent verify"
+```
+
+**Configure Agents in Web UI:**
+
+1. **Click "Add Agent"** in Agent Hub
+2. **Enter agent details:**
+   - Name: `Backend API Agent`
+   - Description: `Handles backend API development`
+   - Working Directory: `/path/to/backend`
+   - API Endpoint: `http://localhost:8081` (local) or `http://remote-host:8081`
+3. **Save and use** with @mentions in messages
+
+**Authentication & Billing:**
+- Uses Claude CLI authentication (`claude auth login`)
+- No API keys needed - OAuth tokens managed securely
+- All requests billed to your Claude subscription (Pro/Team/Enterprise)
+- Same billing model as using Claude Code directly
+
+**Use Cases:**
+- **Full-stack projects**: Separate agents for frontend, backend, database
+- **Microservices**: One agent per service with isolated working directories
+- **Cross-platform**: Mac agent for iOS, Linux agent for Android
+- **Team coordination**: Remote agents on team members' machines
+- **Specialized agents**: API development, testing, documentation, etc.
+
+**Benefits:**
+- Visual workspace for managing multiple agent conversations
+- Specialized agents with focused expertise and codebases
+- Mix local development with remote cloud instances
+- Simple @mention routing instead of complex orchestration
+- Beautiful UI for tracking progress across agents
+
+See [modules/claude-code-by-agents/README.md](modules/claude-code-by-agents/README.md) for full documentation.
 
 ## 🎯 Quick Start
 

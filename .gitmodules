@@ -13,3 +13,6 @@
 [submodule "modules/anthropic-claude-skills"]
 	path = modules/anthropic-claude-skills
 	url = https://github.com/natea/anthropic-claude-skills.git
+[submodule "modules/claude-code-by-agents"]
+	path = modules/claude-code-by-agents
+	url = https://github.com/natea/claude-code-by-agents
