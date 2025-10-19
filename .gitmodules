@@ -1,0 +1,12 @@
+[submodule "modules/superpowers"]
+	path = modules/superpowers
+	url = https://github.com/natea/superpowers
+[submodule "modules/mcp-getgather"]
+	path = modules/mcp-getgather
+	url = https://github.com/natea/mcp-getgather
+[submodule "modules/Skill_Seekers"]
+	path = modules/Skill_Seekers
+	url = https://github.com/natea/Skill_Seekers
+[submodule "modules/life-os"]
+	path = modules/life-os
+	url = https://github.com/natea/life-os
