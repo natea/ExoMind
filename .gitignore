@@ -27,4 +27,4 @@ claude-flow
 hive-mind-prompt-*.txt
 
 # MacOSX
-.DS_Store
+.DS_Store*.backup
