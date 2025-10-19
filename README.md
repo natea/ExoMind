@@ -333,7 +333,63 @@ done
 
 See [modules/Skill_Seekers/README.md](modules/Skill_Seekers/README.md) for full documentation.
 
-### 8. Verify Setup
+### 8. Add VoiceMode (Voice Conversations)
+
+VoiceMode enables natural voice conversations with Claude, supporting both local STT/TTS services and OpenAI fallback:
+
+```bash
+# Install VoiceMode MCP python package and dependencies
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uvx voice-mode-install
+
+# Optional: Set OpenAI API key (backup if local services unavailable)
+export OPENAI_API_KEY=your-openai-key
+
+# Add VoiceMode to Claude
+claude mcp add --scope user voicemode -- uvx --refresh voice-mode
+
+# Start a voice conversation
+claude converse
+```
+
+**What You Get:**
+- 🎤 **Voice Input** - Speak naturally to Claude instead of typing
+- 🔊 **Voice Output** - Hear Claude's responses in natural speech
+- 🏠 **Local Processing** - Uses Whisper (STT) and Kokoro (TTS) for privacy
+- ☁️ **OpenAI Fallback** - Automatic fallback when local services unavailable
+- 🎯 **Low Latency** - Fast response times with optimized processing
+
+**Service Management:**
+
+VoiceMode provides a unified service management tool:
+
+```bash
+# Check service status
+uvx voice-mode service whisper status
+uvx voice-mode service kokoro status
+
+# Start/stop services
+uvx voice-mode service whisper start
+uvx voice-mode service kokoro start
+
+# View logs
+uvx voice-mode service whisper logs
+uvx voice-mode service kokoro logs
+
+# Enable auto-start on boot
+uvx voice-mode service whisper enable
+uvx voice-mode service kokoro enable
+```
+
+**Documentation & Resources:**
+- Website: [getvoicemode.com](https://getvoicemode.com)
+- MCP Resources: Access via `voicemode://docs/*`
+  - `voicemode://docs/quickstart` - Basic usage guide
+  - `voicemode://docs/parameters` - Complete parameter reference
+  - `voicemode://docs/languages` - Non-English language support
+  - `voicemode://docs/troubleshooting` - Audio and connectivity issues
+
+### 9. Verify Setup
 
 ```bash
 # List all configured MCP servers
@@ -353,6 +409,11 @@ composio apps
 
 # Check Superpowers
 # In Claude Code: "List all available superpowers skills"
+
+# Test VoiceMode (if installed)
+uvx voice-mode service whisper status
+uvx voice-mode service kokoro status
+# Try: claude converse
 ```
 
 ## 📚 Included Submodules
