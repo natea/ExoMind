@@ -10,3 +10,6 @@
 [submodule "modules/life-os"]
 	path = modules/life-os
 	url = https://github.com/natea/life-os
+[submodule "modules/anthropic-claude-skills"]
+	path = modules/anthropic-claude-skills
+	url = https://github.com/natea/anthropic-claude-skills.git

@@ -9,6 +9,7 @@ ExoMind is an advanced development environment that integrates:
 - **SPARC Methodology** - Systematic Test-Driven Development (Specification, Pseudocode, Architecture, Refinement, Completion)
 - **Claude Flow** - Multi-agent swarm orchestration with 54+ specialized agents
 - **Superpowers** - Enhanced Claude Code skills and capabilities
+- **Anthropic Skills** - Official example and document skills (PDF, DOCX, PPTX, XLSX)
 - **Knowledge Management** - Personal OS and productivity tools
 - **Google Workspace Integration** - Gmail and Calendar access via MCP
 
@@ -42,6 +43,13 @@ git clone https://github.com/natea/ExoMind.git
 cd ExoMind
 git submodule update --init --recursive
 ```
+
+**Included Submodules:**
+- `modules/superpowers` - Enhanced skills for TDD, brainstorming, debugging
+- `modules/anthropic-claude-skills` - Official Anthropic skills (documents, creative, dev)
+- `modules/mcp-getgather` - Context gathering and web scraping
+- `modules/Skill_Seekers` - Auto-generate skills from documentation
+- `modules/life-os` - Personal productivity and life management
 
 ### 2. Initialize Claude Flow
 
@@ -418,7 +426,7 @@ uvx voice-mode service kokoro status
 
 ## 📚 Included Submodules
 
-ExoMind includes four specialized modules in the `modules/` directory:
+ExoMind includes five specialized modules in the `modules/` directory:
 
 ### [Superpowers](https://github.com/natea/superpowers)
 Enhanced Claude Code skills for systematic development workflows.
@@ -491,6 +499,52 @@ Personal operating system for productivity and life management.
 - Habit formation systems
 - Time management tools
 - Personal knowledge management
+
+### [Anthropic Claude Skills](https://github.com/natea/anthropic-claude-skills)
+Official example skills from Anthropic demonstrating Claude's skills system capabilities.
+
+**Installation:** `/plugin install example-skills@anthropic-agent-skills` or `/plugin install document-skills@anthropic-agent-skills`
+
+**Key Features:**
+- **Document Skills** - Create and edit DOCX, PDF, PPTX, XLSX files
+- **Creative Skills** - Algorithmic art, canvas design, Slack GIF creation
+- **Development Skills** - MCP server creation, webapp testing, artifact building
+- **Enterprise Skills** - Brand guidelines, internal communications, theme factory
+- **Meta Skills** - Skill creator and template for building custom skills
+
+**Example Skills Include:**
+- `algorithmic-art` - Generative art with p5.js
+- `canvas-design` - Visual art in PNG/PDF formats
+- `artifacts-builder` - Complex HTML artifacts with React/Tailwind
+- `mcp-server` - Guide for creating MCP servers
+- `webapp-testing` - Test web apps with Playwright
+- `brand-guidelines` - Apply consistent branding
+- `skill-creator` - Create effective custom skills
+
+**Document Skills Include:**
+- `docx` - Word documents with tracked changes and formatting
+- `pdf` - PDF manipulation, extraction, and creation
+- `pptx` - PowerPoint presentations with layouts and charts
+- `xlsx` - Excel spreadsheets with formulas and visualization
+
+**Quick Start:**
+```bash
+# Register the marketplace
+/plugin marketplace add anthropics/skills
+
+# Install example skills
+/plugin install example-skills@anthropic-agent-skills
+
+# Install document skills
+/plugin install document-skills@anthropic-agent-skills
+
+# Use a skill
+"Use the PDF skill to extract text from document.pdf"
+"Create an algorithmic art piece using p5.js"
+"Build a React artifact for a task management app"
+```
+
+See [modules/anthropic-claude-skills/README.md](modules/anthropic-claude-skills/README.md) for full documentation.
 
 ## 🎯 Quick Start
 
