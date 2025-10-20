@@ -35,3 +35,5 @@ node_modules/
 # Claude Code duplicated skills (use symlinks instead)
 .claude/skills/
 !.claude/skills/.gitkeep
+.claude/skills.bak/
+.claude/skills.old/

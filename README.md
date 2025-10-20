@@ -492,14 +492,55 @@ python3 cli/package_skill.py output/react/
 - Quick reference guides
 
 ### [Life OS](https://github.com/natea/life-os)
-Personal operating system for productivity and life management.
+Personal operating system for productivity and life management with 20+ integrated skills.
 
-**Key Features:**
-- Task and project management
-- Goal tracking and planning
-- Habit formation systems
-- Time management tools
-- Personal knowledge management
+**Complete Implementation (Weeks 1-11):**
+- ✅ **20+ Skills** - Full GTD workflow, reviews, goal tracking, integrations
+- ✅ **100+ Source Files** - TypeScript codebase with configuration management
+- ✅ **600+ Tests** - Comprehensive test coverage
+- ✅ **10K+ Lines of Docs** - Complete user guides and API documentation
+
+**Core Skills:**
+- `conducting-life-assessment` - 10 life areas quarterly evaluation
+- `daily-planning` - Morning/evening routines with energy management
+- `weekly-review` - Complete GTD methodology
+- `monthly-review` - Intelligent aggregation and pattern detection
+- `quarterly-review` - OKR scoring and 90-day retrospectives
+- `goal-setting` - SMART goals + OKR framework
+- `processing-inbox` - GTD inbox processing workflow
+
+**Integration Skills:**
+- `processing-email-inbox` - Email-to-task conversion via Google Workspace MCP
+- `analyzing-schedule` - Calendar analysis and optimization
+- `scheduling-tasks` - Smart time blocking
+- `whatsapp-message-management` - Mobile briefings and quick capture
+- `resolving-sync-conflicts` - Todoist conflict resolution
+
+**Advanced Skills:**
+- `detecting-patterns` - 6 pattern types across productivity data
+- `smart-recommendations` - AI-powered insights
+- `tracking-habits` - Streak management and consistency analysis
+- `coordinating-life-os` - System orchestration and health checks
+
+**Life Management:**
+- `meal-planning` - Weekly meal planning with dietary preferences
+- `recipe-finding` - Recipe search and scaling
+- `grocery-shopping` - Automated shopping list generation
+
+**Quick Start:**
+```bash
+# Install dependencies
+npm install
+
+# Test the skills in Claude Code
+./scripts/sync-claude-skills.sh
+
+# Run validation
+npm run validate:all
+npm test
+```
+
+See [docs/user/getting-started.md](docs/user/getting-started.md) for complete setup guide.
 
 ### [Anthropic Claude Skills](https://github.com/natea/anthropic-claude-skills)
 Official example skills from Anthropic demonstrating Claude's skills system capabilities.
@@ -639,6 +680,59 @@ npm run dist:linux  # Linux AppImage
 - Beautiful UI for tracking progress across agents
 
 See [modules/claude-code-by-agents/README.md](modules/claude-code-by-agents/README.md) for full documentation.
+
+## 🧪 Testing Life OS Skills in Claude Code
+
+ExoMind includes 20+ Life OS skills for personal productivity. To test them in Claude Code:
+
+### Option 1: Symlinks (Recommended)
+
+Use symlinks to keep skills synchronized automatically:
+
+```bash
+# Create symlinks from /skills/ to /.claude/skills/
+./scripts/sync-claude-skills.sh
+
+# Verify symlinks were created
+ls -la .claude/skills/
+# Should show: skill-name -> ../../skills/skill-name
+
+# Test a skill in Claude Code
+"Use the daily-planning skill to plan my day"
+```
+
+**Benefits:**
+- ✅ Single source of truth in `skills/`
+- ✅ Changes in either location reflect everywhere
+- ✅ No manual syncing needed
+- ✅ Git tracks only the original files
+
+### Option 2: Manual Copying (Not Recommended)
+
+Copy files manually (requires re-sync after each change):
+
+```bash
+# Copy all skills to .claude/skills
+cp -r skills/* .claude/skills/
+
+# Remember: Must re-run after ANY skill modification!
+```
+
+⚠️ **Warning:** Easy to forget, files will diverge, requires manual syncing.
+
+### Available Skills
+
+All 20+ Life OS skills are available in `.claude/skills/`:
+- **Planning**: daily-planning, weekly-review, monthly-review, quarterly-review
+- **Goals**: conducting-life-assessment, goal-setting
+- **GTD**: processing-inbox, processing-email-inbox
+- **Calendar**: analyzing-schedule, scheduling-tasks
+- **Advanced**: detecting-patterns, smart-recommendations, tracking-habits
+- **Integration**: whatsapp-message-management, resolving-sync-conflicts
+- **System**: coordinating-life-os, using-life-os
+- **Life**: meal-planning, recipe-finding, grocery-shopping
+
+See [.claude/skills/README.md](.claude/skills/README.md) for complete documentation.
 
 ## 🎯 Quick Start
 
