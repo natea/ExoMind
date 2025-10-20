@@ -1,0 +1,80 @@
+{
+  "user": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "timezone": "America/New_York",
+    "language": "en",
+    "notifications": {
+      "email": false,
+      "push": false,
+      "whatsapp": false
+    },
+    "dietary": {
+      "vegetarian": false,
+      "vegan": false,
+      "glutenFree": false,
+      "allergies": [],
+      "dislikes": []
+    }
+  },
+
+  "skills": {
+    "enabled": {
+      "meal_planning": true,
+      "recipe-finding": true,
+      "grocery-shopping": true,
+      "whatsapp-message-management": true,
+      "personality_assessment": true
+    },
+    "settings": {
+      "meal_planning": {
+        "weeklyPlanDay": "sunday",
+        "mealsPerWeek": 7,
+        "servingsPerMeal": 2,
+        "maxBudget": 200,
+        "cuisinePreferences": []
+      },
+      "grocery-shopping": {
+        "checkPantry": true,
+        "consolidateIngredients": true,
+        "preferredStores": ["costco", "instacart"]
+      },
+      "whatsapp-message-management": {
+        "autoSendBriefing": false,
+        "briefingTime": "08:00"
+      }
+    }
+  },
+
+  "integrations": {
+    "whatsapp": {
+      "enabled": false,
+      "autoSend": false,
+      "defaultRecipient": null
+    },
+    "calendar": {
+      "enabled": false,
+      "provider": "google",
+      "syncInterval": 3600
+    },
+    "shopping": {
+      "costcoEnabled": false,
+      "instacartEnabled": false,
+      "defaultStore": "manual"
+    }
+  },
+
+  "system": {
+    "debug": false,
+    "logLevel": "info",
+    "telemetry": false,
+    "autoUpdate": true
+  },
+
+  "memory": {
+    "databasePath": "./.swarm/memory.db",
+    "persistent": true,
+    "retentionDays": 90,
+    "compression": true
+  }
+}

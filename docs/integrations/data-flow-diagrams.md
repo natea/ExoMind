@@ -160,7 +160,9 @@ sequenceDiagram
 
 ## 3. Google Keep Integration Flow
 
-### Chrome Extension Capture Flow
+> ⏸️ **STATUS: DEFERRED** - Google Keep integration is on hold due to lack of official API. Use Todoist or WhatsApp for quick capture instead.
+
+### Chrome Extension Capture Flow (Deferred)
 
 ```mermaid
 sequenceDiagram
@@ -204,25 +206,15 @@ graph TB
     L --> M[Store in Chrome Storage]
 ```
 
-### Alternative: Google Tasks API
+### Alternative: Google Tasks API (Also Deferred)
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant CS as Claude Skills
-    participant GT as Google Tasks API
-    participant K as Keep UI
+> ⏸️ **NOT IMPLEMENTED** - Todoist already handles task management. Google Tasks integration is not needed.
 
-    Note over CS,K: Workaround for Keep API limitation
-
-    U->>CS: Create Note
-    CS->>GT: Create Task with Note Content
-    GT-->>CS: Task Created
-    CS->>CS: Store Local Copy
-
-    U->>K: View in Google Tasks
-    Note over K: Tasks appear in Keep-like interface
-```
+**Rationale:**
+- Todoist provides superior task management (Phase 4 - implemented)
+- WhatsApp MCP handles quick capture (Phase 10 - implemented)
+- Google Tasks would create redundant functionality
+- Complexity not justified for Life-OS use case
 
 ---
 
@@ -296,89 +288,137 @@ sequenceDiagram
 
 ---
 
-## 5. Telegram Integration Flow
+## 5. WhatsApp Message Management Flow
 
-### Command Processing Flow
+> ✅ **IMPLEMENTED** - Uses WhatsApp MCP server with Life-OS skill wrapper (Week 10).
+
+**Note**: This section replaces the original Telegram bot integration. WhatsApp MCP provides equivalent functionality with simplified architecture.
+
+### Command Processing Flow (via WhatsApp MCP)
 
 ```mermaid
 sequenceDiagram
     participant U as User
-    participant T as Telegram Bot
-    participant WH as Webhook
+    participant WA as WhatsApp
+    participant MCP as WhatsApp MCP
+    participant SK as Life-OS Skill
     participant CS as Claude Skills
     participant TD as Todoist
 
-    U->>T: /task add "Buy milk"
-    T->>WH: Update Event
-    WH->>WH: Verify Secret
-    WH->>WH: Parse Command
-    WH->>CS: Create Task
+    U->>WA: /task "Buy milk"
+    WA->>MCP: Message Received
+    MCP->>SK: Parse Command
+    SK->>SK: Validate Command
+    SK->>CS: Create Task
     CS->>TD: Sync to Todoist
     TD-->>CS: Task Created
-    CS-->>WH: Success
-    WH->>T: Send Confirmation
-    T-->>U: ✅ Task created!
+    CS-->>SK: Success
+    SK->>MCP: Format Response
+    MCP->>WA: Send Confirmation
+    WA-->>U: ✅ Task created!
 ```
 
-### Quick Capture Flow
+**Key Differences from Telegram:**
+- No webhook infrastructure needed
+- Authentication handled by MCP
+- Skill wrapper coordinates via MCP tools
+- Simpler deployment and maintenance
+
+### Quick Capture Flow (Simplified with WhatsApp MCP)
 
 ```mermaid
 graph TB
-    A[User] -->|Send Message| B[Telegram Bot]
-    B --> C{Is Command?}
+    A[User] -->|WhatsApp Message| B[WhatsApp MCP]
+    B --> C[Life-OS Skill Wrapper]
+    C --> D{Parse Message}
 
-    C -->|Yes /task| D[Parse Command]
-    C -->|Yes /list| E[Query Tasks]
-    C -->|No| F[Quick Capture]
+    D -->|Command /task| E[Create Task]
+    D -->|Command /review| F[Generate Summary]
+    D -->|Command /goals| G[Show Active Plans]
+    D -->|Plain Text| H[Add to Inbox]
 
-    D --> G[Create Task]
-    E --> H[Format List]
-    F --> I[Create Note]
+    E --> I[Update Memory]
+    F --> I
+    G --> I
+    H --> I
 
-    G --> J[Claude Skills]
-    H --> J
-    I --> J
-
-    J --> K[Respond to User]
+    I --> J[Sync to Todoist]
+    J --> K[Format Response]
     K --> B
+    B -->|WhatsApp| A
 ```
 
-### Interactive Callback Flow
+**Advantages:**
+- No bot registration required
+- No webhook setup
+- MCP handles authentication
+- Skill-based command parsing
+- Portable across MCP-enabled environments
+
+### Daily Briefing Flow (Morning & Evening Routines)
 
 ```mermaid
 sequenceDiagram
+    participant CRON as Schedule (5:30 AM / 8:30 PM)
+    participant SK as Life-OS Skill
     participant CS as Claude Skills
-    participant T as Telegram Bot
+    participant MCP as WhatsApp MCP
     participant U as User
 
-    Note over CS: Task Due Reminder
-    CS->>T: Send Notification with Keyboard
-    T-->>U: 📋 Task: Buy groceries
+    Note over CRON: Morning Briefing (5:30 AM)
+    CRON->>SK: Trigger Morning Routine
+    SK->>CS: Fetch Today's Tasks
+    SK->>CS: Fetch Active Goals
+    SK->>CS: Fetch Habit Reminders
+    CS-->>SK: Compiled Data
+    SK->>SK: Format Briefing
+    SK->>MCP: Send Message
+    MCP-->>U: 🌅 Good morning! Here's your day...
 
-    Note over U: Shows Inline Keyboard
-    U->>T: Click "✅ Mark Done"
-    T->>CS: callback_query: complete:task123
-    CS->>CS: Mark Task Complete
-    CS-->>T: Answer Callback
-    T-->>U: ✅ Task completed!
+    Note over CRON: Evening Review (8:30 PM)
+    CRON->>SK: Trigger Evening Routine
+    SK->>CS: Fetch Completed Tasks
+    SK->>CS: Fetch Tomorrow's Preview
+    CS-->>SK: Compiled Data
+    SK->>SK: Format Review
+    SK->>MCP: Send Message
+    MCP-->>U: 🌙 Great work today! Tomorrow: ...
+
+    U->>MCP: /habits log
+    MCP->>SK: Process Command
+    SK->>CS: Update Habit Tracking
+    CS-->>SK: Saved
+    SK->>MCP: Format Response
+    MCP-->>U: ✅ Habits logged!
 ```
 
-### Multi-Device Sync
+### Multi-Device Sync (via WhatsApp MCP)
 
 ```mermaid
 graph TB
-    A[User's Phone] -->|Telegram| B[Bot API]
-    C[User's Desktop] -->|Telegram| B
-    D[User's Tablet] -->|Telegram| B
+    A[User's Phone] -->|WhatsApp| B[WhatsApp MCP]
+    C[User's Desktop Web] -->|WhatsApp| B
+    D[User's Tablet] -->|WhatsApp| B
 
-    B --> E[Webhook Handler]
+    B --> E[Life-OS Skill Wrapper]
     E --> F[Claude Skills]
 
-    F -->|Broadcast Updates| G[WebSocket Server]
-    G -->|Push| H[Web App]
-    G -->|Push| I[Mobile App]
-    G -->|Push| J[Desktop App]
+    F -->|Update| G[Memory Files]
+    G -->|Sync| H[Todoist]
+    G -->|Sync| I[Google Calendar]
+
+    F -->|Notifications| B
+    B -->|Message| A
+    B -->|Message| C
+    B -->|Message| D
 ```
+
+**Simplified Architecture:**
+- WhatsApp handles multi-device sync natively
+- No custom WebSocket server needed
+- Memory files are the source of truth
+- External tools sync bidirectionally
+- WhatsApp MCP broadcasts responses to all devices
 
 ---
 
@@ -390,57 +430,62 @@ graph TB
 graph TB
     subgraph External Services
         A[Todoist]
-        B[Gmail]
-        C[Keep]
-        D[Chrome]
-        E[Telegram]
+        B[Gmail via Google Workspace MCP]
+        C[Keep - Deferred]
+        D[Chrome - Future]
+        E[WhatsApp via MCP]
+        F[Google Calendar via MCP]
     end
 
-    subgraph Integration Hub
-        F[Event Bus]
-        G[Sync Queue]
-        H[Conflict Resolver]
-        I[Error Handler]
+    subgraph Integration Layer
+        G[Event Bus]
+        H[Sync Queue]
+        I[Conflict Resolver]
+        J[Error Handler]
     end
 
     subgraph Claude Skills
-        J[Task Manager]
-        K[Note Manager]
-        L[Resource Manager]
-        M[Communication Manager]
+        K[Task Manager]
+        L[Note Manager]
+        M[Resource Manager]
+        N[WhatsApp Skill Wrapper]
     end
 
     subgraph Storage
-        N[(PostgreSQL)]
-        O[(Redis Cache)]
-        P[File Storage]
+        O[Memory Files - Source of Truth]
+        P[Todoist Sync State]
+        Q[Google Calendar Cache]
     end
 
-    A -->|Webhook| F
-    B -->|Pub/Sub| F
-    C -->|Extension| F
-    D -->|Extension| F
-    E -->|Webhook| F
+    A -->|REST API| G
+    B -->|MCP Tools| K
+    E -->|MCP Tools| N
+    F -->|MCP Tools| K
 
-    F --> G
     G --> H
     H --> I
-
     I --> J
-    I --> K
-    I --> L
-    I --> M
 
+    J --> K
+    J --> L
+    J --> M
     J --> N
-    K --> N
-    L --> N
-    M --> N
 
-    J --> O
     K --> O
     L --> O
     M --> O
+    N --> O
+
+    O --> P
+    O --> Q
 ```
+
+**Key Changes from Original:**
+- Google Keep marked as deferred
+- Telegram replaced with WhatsApp MCP
+- Gmail/Calendar via Google Workspace MCP (no webhooks)
+- Memory files as central storage (not PostgreSQL)
+- Simplified architecture for local-only operation
 
 ### Event-Driven Architecture
 

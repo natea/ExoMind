@@ -1064,10 +1064,11 @@ async function checkIntegrationHealth(): Promise<HealthStatus> {
 - ✅ Google Calendar integration (schedule management)
 - ✅ WhatsApp skill wrapper (2-3 days)
 
-### Phase 2: Extension Development (Optional - Week 13+)
-- ⏸️ Chrome bookmarks extension (deferred to Phase 6)
-- ⏸️ Keep capture extension (deferred - no official API)
+### Phase 2: Extension Development (Optional - Future)
+- ⏸️ Chrome bookmarks extension (deferred to Phase 6+)
+- ⏸️ Keep capture extension (deferred indefinitely - no official API)
 - ❌ Webhook infrastructure (not needed - MCP handles communication)
+- ❌ Telegram bot (replaced by WhatsApp MCP integration)
 
 ### Phase 3: Sync & Reliability (Week 5-6)
 - ✅ Event bus implementation

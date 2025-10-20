@@ -28,3 +28,6 @@ hive-mind-prompt-*.txt
 
 # MacOSX
 .DS_Store*.backup
+
+# NodeJS
+node_modules/

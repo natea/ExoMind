@@ -96,18 +96,18 @@
       }
     ],
     "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "npx claude-flow@alpha hooks session-end --generate-summary true --persist-state true --export-metrics true"
-          }
-        ]
-      }
-    ]
+        {
+          "hooks": [
+            {
+              "type": "command",
+              "command": "npx claude-flow@alpha hooks session-end --generate-summary true --persist-state true --export-metrics true > /dev/null 2>&1"
+            }
+          ]
+        }
+      ]
   },
   "includeCoAuthoredBy": true,
-  "enabledMcpjsonServers": ["claude-flow", "ruv-swarm"],
+  "enabledMcpjsonServers": ["claude-flow@alpha", "ruv-swarm"],
   "statusLine": {
     "type": "command",
     "command": ".claude/statusline-command.sh"

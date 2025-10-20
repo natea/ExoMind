@@ -748,15 +748,26 @@ npm run email:list  # List recent emails
 - Follow-up tracking
 - Inbox zero workflows
 
-### 4.3 Google Keep (Planned)
-**Purpose**: Quick capture on mobile devices
+### 4.3 Google Keep Integration
 
-**Planned Features**:
-- Voice note capture
-- Quick text notes
-- Location-based reminders
-- Cross-device sync
-- Integration with inbox.md
+> ⏸️ **STATUS: DEFERRED** - Google Keep integration is on hold due to lack of official API.
+
+**Alternatives for Quick Capture:**
+- Use **Todoist** quick add (implemented in Week 8)
+- Use **WhatsApp** messages (implemented in Week 10)
+- Use `memory/inbox.md` for immediate capture
+
+**Why Deferred:**
+- No official Google Keep API available
+- Unofficial solutions are unreliable and unsupported
+- Better alternatives already available (Todoist + WhatsApp MCP)
+
+**Not Planned:**
+- Voice note capture (use WhatsApp voice messages instead)
+- Quick text notes (use Todoist or WhatsApp instead)
+- Location-based reminders (not critical for Life-OS)
+- Cross-device sync (handled by Todoist and WhatsApp)
+- Integration with inbox.md (handled by Todoist)
 
 ### 4.4 Chrome Bookmarks (Planned)
 **Purpose**: Resource collection and knowledge library
@@ -767,16 +778,38 @@ npm run email:list  # List recent emails
 - Quick access to tools
 - Learning material tracking
 
-### 4.5 Telegram Bot (Planned)
-**Purpose**: Mobile-first interaction and logging
+### 4.5 WhatsApp Message Management (Implemented)
 
-**Planned Features**:
-- Instant thought capture
-- Daily briefings
-- Habit tracking
-- Progress monitoring
-- Health and mood logging
-- Voice message transcription
+> ✅ **IMPLEMENTED** - Uses WhatsApp MCP server with Life-OS skill wrapper.
+
+**Purpose**: Mobile-first communication hub for quick capture and daily briefings
+
+**Architecture**:
+- WhatsApp MCP handles all authentication and messaging
+- Life-OS provides skill wrapper (`skills/managing-whatsapp-messages/SKILL.md`)
+- No webhook infrastructure needed
+- No bot token registration required
+
+**Implemented Features**:
+- Instant thought capture via WhatsApp messages
+- Daily briefings (morning and evening routines)
+- Habit tracking and logging
+- Task management commands (`/inbox`, `/task`, `/done`)
+- Progress monitoring (`/review`, `/goals`)
+- Life area check-ins (`/assess`)
+
+**Commands**:
+```
+/inbox <item>   - Add to GTD inbox
+/task <task>    - Create next action
+/done <task>    - Complete task
+/review         - Get daily summary
+/goals          - View active plans
+/habits         - Log habit check-in
+/assess         - Quick life area check-in
+```
+
+**Implementation**: Week 10 (2-3 days)
 
 ### 4.6 Google Calendar (Planned)
 **Purpose**: Time management and scheduling
@@ -1012,13 +1045,14 @@ Core habits monitored:
 ✅ Review cycles
 ✅ Template system
 
-### Phase 2: Enhanced Features (Planned)
-- Telegram bot integration
-- Google Calendar sync
-- Voice to text conversion
-- Smart link organization
-- Automated tracking
-- Progress analytics
+### Phase 2: Enhanced Features (Week 10+)
+- ✅ WhatsApp skill wrapper (Week 10 - implemented)
+- ✅ Google Calendar sync (Week 9 - via Google Workspace MCP)
+- ⏸️ Chrome bookmarks extension (deferred to Phase 6)
+- ⏸️ Google Keep integration (deferred - no official API)
+- Smart link organization (future)
+- Automated tracking (future)
+- Progress analytics (future)
 
 ### Phase 3: AI Features (Future)
 - Pattern detection
