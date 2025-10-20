@@ -149,7 +149,7 @@ export function meetsTwoMinuteRule(estimatedMinutes: number): boolean {
  * Route item to appropriate list based on decision
  */
 export function routeItem(
-  item: InboxItem,
+  _item: InboxItem,
   decision: ItemDecision,
   context?: ActionContext
 ): {

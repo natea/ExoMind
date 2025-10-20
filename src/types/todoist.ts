@@ -19,7 +19,7 @@ export interface TodoistTask {
     datetime?: string; // RFC3339 format
     string?: string; // Human readable
     timezone?: string;
-    is_recurring: boolean;
+    is_recurring?: boolean;
   };
   url: string;
   comment_count: number;

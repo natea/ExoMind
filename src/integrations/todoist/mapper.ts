@@ -5,6 +5,9 @@
 import { Task } from '../../types/task';
 import { TodoistTask, MapperOptions } from './types';
 
+// Export Task type as LifeOSTask for compatibility
+export type LifeOSTask = Task;
+
 export class TodoistMapper {
   private options: MapperOptions;
 
@@ -198,5 +201,37 @@ export class TodoistMapper {
    */
   private formatDate(date: Date): string {
     return date.toISOString().split('T')[0];
+  }
+
+  /**
+   * Helper method: Find project by name
+   */
+  findProjectByName(projects: Array<{ id: string; name: string }>, name: string): { id: string; name: string } | undefined {
+    return projects.find(p => p.name === name);
+  }
+
+  /**
+   * Alias for fromTodoist with additional localId parameter
+   */
+  fromTodoistTask(todoistTask: TodoistTask, localId?: string): Task {
+    const task = this.fromTodoist(todoistTask);
+    if (localId) {
+      task.id = localId;
+    }
+    return task;
+  }
+
+  /**
+   * Alias for toTodoist with additional parameters
+   */
+  toTodoistTask(task: Task, projectId?: string, todoistId?: string): TodoistTask {
+    const todoistTask = this.toTodoist(task);
+    if (projectId) {
+      todoistTask.project_id = projectId;
+    }
+    if (todoistId) {
+      todoistTask.id = todoistId;
+    }
+    return todoistTask;
   }
 }
