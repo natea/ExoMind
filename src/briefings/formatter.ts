@@ -2,7 +2,7 @@
  * Message formatting for WhatsApp briefings
  */
 
-import { BriefingContent, CalendarEvent, TaskItem } from '../types/briefing';
+import { BriefingContent, CalendarEvent } from '../types/briefing';
 
 const MAX_WHATSAPP_LENGTH = 4096; // WhatsApp message limit
 const EMOJI_MAP = {

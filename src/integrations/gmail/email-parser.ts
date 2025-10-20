@@ -80,7 +80,7 @@ export class EmailParser {
     text = text.replace(/&lt;/g, '<');
     text = text.replace(/&gt;/g, '>');
     text = text.replace(/&quot;/g, '"');
-    text = text.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec));
+    text = text.replace(/&#(\d+);/g, (_match, dec) => String.fromCharCode(dec));
 
     // Clean up whitespace
     text = text.replace(/\n{3,}/g, '\n\n');

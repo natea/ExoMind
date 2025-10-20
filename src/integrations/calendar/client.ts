@@ -28,12 +28,10 @@ interface Calendar {
  * Calendar client for Google Workspace integration
  */
 export class CalendarClient {
-  private userEmail: string;
   private settings: CalendarSettings;
   private syncStatus: CalendarSyncStatus;
 
-  constructor(userEmail: string, settings: CalendarSettings) {
-    this.userEmail = userEmail;
+  constructor(_userEmail: string, settings: CalendarSettings) {
     this.settings = settings;
     this.syncStatus = {
       lastSync: new Date(),
@@ -138,11 +136,11 @@ export class CalendarClient {
    * Get events from a specific calendar
    */
   private async getCalendarEvents(
-    calendarId: string,
-    startDate: Date,
-    endDate: Date,
-    searchQuery?: string,
-    includeRecurring: boolean = true
+    _calendarId: string,
+    _startDate: Date,
+    _endDate: Date,
+    _searchQuery?: string,
+    _includeRecurring: boolean = true
   ): Promise<CalendarEvent[]> {
     // MCP tool: mcp__google-workspace__get_events
     // Parameters:
@@ -256,9 +254,11 @@ export class CalendarClient {
   /**
    * Delete a calendar event
    */
-  async deleteEvent(eventId: string, calendarId?: string): Promise<void> {
+  async deleteEvent(_eventId: string, calendarId?: string): Promise<void> {
     try {
-      const targetCalendarId = calendarId || this.settings.primaryCalendarId;
+      // Calendar ID not used in stub implementation
+      const _targetCalendarId = calendarId || this.settings.primaryCalendarId;
+      void _targetCalendarId; // Acknowledge unused variable
 
       // MCP tool: mcp__google-workspace__delete_event
       // Parameters:
@@ -276,9 +276,11 @@ export class CalendarClient {
   /**
    * Get a single event by ID
    */
-  async getEvent(eventId: string, calendarId?: string): Promise<CalendarEvent | null> {
+  async getEvent(_eventId: string, calendarId?: string): Promise<CalendarEvent | null> {
     try {
-      const targetCalendarId = calendarId || this.settings.primaryCalendarId;
+      // Calendar ID not used in stub implementation
+      const _targetCalendarId = calendarId || this.settings.primaryCalendarId;
+      void _targetCalendarId; // Acknowledge unused variable
 
       // MCP tool: mcp__google-workspace__get_events with event_id parameter
       // Parameters:

@@ -6,13 +6,12 @@
 
 import { TodoistClient } from './client';
 import { TodoistMapper, LifeOSTask } from './mapper';
-import { ConflictResolver, ConflictResolutionResult } from './conflict-resolver';
+import { ConflictResolver } from './conflict-resolver';
 import {
   TodoistTask,
   TodoistSyncState,
   SyncConfig,
-  SyncResult,
-  TodoistCommand
+  SyncResult
 } from '../../types/todoist';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -230,7 +229,9 @@ export class TodoistSync {
       const todoistTasksMap = new Map(todoistTasks.map(t => [t.id, t]));
 
       // Step 2: Detect conflicts and changes
-      const localTasksMap = new Map(localTasks.map(t => [t.id, t]));
+      // Local tasks map not used in current implementation
+      const _localTasksMap = new Map(localTasks.map(t => [t.id, t]));
+      void _localTasksMap; // Acknowledge unused variable
       const resolvedTasks: LifeOSTask[] = [];
       const tasksToSync: LifeOSTask[] = [];
 

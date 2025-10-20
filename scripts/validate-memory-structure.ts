@@ -6,7 +6,7 @@
  */
 
 import { readdir, stat, readFile, access } from 'fs/promises';
-import { join, relative } from 'path';
+import { join } from 'path';
 import { constants } from 'fs';
 
 interface ValidationResult {
@@ -49,12 +49,13 @@ const REQUIRED_FILES = [
   'reference/decisions/.template.md'
 ];
 
-const OPTIONAL_INDICATORS = [
-  'reviews/daily/*.md',
-  'reviews/weekly/*.md',
-  'reviews/monthly/*.md',
-  'reviews/quarterly/*.md'
-];
+// Optional indicators for future use
+// const OPTIONAL_INDICATORS = [
+//   'reviews/daily/*.md',
+//   'reviews/weekly/*.md',
+//   'reviews/monthly/*.md',
+//   'reviews/quarterly/*.md'
+// ];
 
 async function fileExists(path: string): Promise<boolean> {
   try {

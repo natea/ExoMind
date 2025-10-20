@@ -56,26 +56,27 @@ describe('Life OS Skills Structure', () => {
           expect(result.errors).toHaveLength(0);
         });
 
-        it('should have README.md', async () => {
+        it('should have SKILL.md', async () => {
           const result = await validateSkillStructure(skillPath, {
             name,
             description,
-            requiredFiles: ['README.md'],
+            requiredFiles: ['SKILL.md'],
             optionalFiles: [],
           });
 
-          expect(result.errors).not.toContain('Missing required file: README.md');
+          expect(result.errors).not.toContain('Missing required file: SKILL.md');
         });
 
-        it('should have index.ts', async () => {
+        it('README.md and index.ts are optional', async () => {
           const result = await validateSkillStructure(skillPath, {
             name,
             description,
-            requiredFiles: ['index.ts'],
-            optionalFiles: [],
+            requiredFiles: ['SKILL.md'],
+            optionalFiles: ['README.md', 'index.ts'],
           });
 
-          expect(result.errors).not.toContain('Missing required file: index.ts');
+          // These should be warnings, not errors
+          expect(result.valid).toBe(true);
         });
       });
     });

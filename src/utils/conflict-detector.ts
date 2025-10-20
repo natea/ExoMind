@@ -72,7 +72,7 @@ export function hasBothBeenModified(
     return true;
   }
 
-  const localModified = new Date(localTask.updated_at || localTask.created_at);
+  const localModified = new Date(localTask.updatedAt || localTask.createdAt);
   const remoteModified = new Date(remoteTask.updated_at || remoteTask.created_at);
 
   const localModifiedAfterSync = localModified > lastSyncedAt;
@@ -97,19 +97,19 @@ export function detectTaskConflicts(
   const conflicts: ConflictField[] = [];
 
   // Check title conflict
-  if (localTask.content !== remoteTask.content) {
+  if (localTask.title !== remoteTask.content) {
     conflicts.push({
       field: 'title',
-      localValue: localTask.content,
+      localValue: localTask.title,
       remoteValue: remoteTask.content,
       conflictType: ConflictType.TITLE,
-      severity: determineTitleSeverity(localTask.content, remoteTask.content),
+      severity: determineTitleSeverity(localTask.title, remoteTask.content),
       reason: 'Title modified in both local and remote'
     });
   }
 
   // Check due date conflict
-  const localDue = localTask.due?.date;
+  const localDue = localTask.dueDate?.toISOString().split('T')[0];
   const remoteDue = remoteTask.due?.date;
   if (localDue !== remoteDue) {
     conflicts.push({
@@ -123,10 +123,11 @@ export function detectTaskConflicts(
   }
 
   // Check status conflict (critical!)
-  if (localTask.is_completed !== remoteTask.is_completed) {
+  const localIsCompleted = localTask.status === 'done';
+  if (localIsCompleted !== remoteTask.is_completed) {
     conflicts.push({
       field: 'status',
-      localValue: localTask.is_completed,
+      localValue: localIsCompleted,
       remoteValue: remoteTask.is_completed,
       conflictType: ConflictType.STATUS,
       severity: ConflictSeverity.HIGH,
@@ -147,10 +148,10 @@ export function detectTaskConflicts(
   }
 
   // Check project conflict
-  if (localTask.project_id !== remoteTask.project_id) {
+  if (localTask.project !== remoteTask.project_id) {
     conflicts.push({
       field: 'project',
-      localValue: localTask.project_id,
+      localValue: localTask.project,
       remoteValue: remoteTask.project_id,
       conflictType: ConflictType.PROJECT,
       severity: ConflictSeverity.MEDIUM,
@@ -171,11 +172,11 @@ export function detectTaskConflicts(
   }
 
   // Check labels conflict
-  const localLabels = new Set(localTask.labels || []);
+  const localLabels = new Set(localTask.tags || []);
   const remoteLabels = new Set(remoteTask.labels || []);
   const labelsMatch =
     localLabels.size === remoteLabels.size &&
-    [...localLabels].every(label => remoteLabels.has(label));
+    [...localLabels].every(label => remoteLabels.has(label as string));
 
   if (!labelsMatch) {
     conflicts.push({
@@ -189,10 +190,11 @@ export function detectTaskConflicts(
   }
 
   // Check parent task conflict
-  if (localTask.parent_id !== remoteTask.parent_id) {
+  const localParentId = localTask.metadata?.todoist?.parent_id;
+  if (localParentId !== remoteTask.parent_id) {
     conflicts.push({
       field: 'parent',
-      localValue: localTask.parent_id,
+      localValue: localParentId,
       remoteValue: remoteTask.parent_id,
       conflictType: ConflictType.PARENT,
       severity: ConflictSeverity.MEDIUM,
@@ -201,10 +203,11 @@ export function detectTaskConflicts(
   }
 
   // Check section conflict
-  if (localTask.section_id !== remoteTask.section_id) {
+  const localSectionId = localTask.metadata?.todoist?.section_id;
+  if (localSectionId !== remoteTask.section_id) {
     conflicts.push({
       field: 'section',
-      localValue: localTask.section_id,
+      localValue: localSectionId,
       remoteValue: remoteTask.section_id,
       conflictType: ConflictType.SECTION,
       severity: ConflictSeverity.LOW,
@@ -323,7 +326,7 @@ function suggestResolutionStrategy(
   }
 
   // Check timestamps to suggest which is more recent
-  const localTime = new Date(localTask.updated_at || localTask.created_at);
+  const localTime = new Date(localTask.updatedAt || localTask.createdAt);
   const remoteTime = new Date(remoteTask.updated_at || remoteTask.created_at);
 
   if (localTime > remoteTime) {
@@ -412,7 +415,7 @@ export function detectAllConflicts(
  */
 export function generateConflictSummary(conflict: TaskConflict): string {
   const lines: string[] = [];
-  lines.push(`Task: "${conflict.localTask.content}"`);
+  lines.push(`Task: "${conflict.localTask.title}"`);
   lines.push(`Conflict Count: ${conflict.conflicts.length}`);
   lines.push(`Severity: ${conflict.overallSeverity}`);
   lines.push(`Auto-Mergeable: ${conflict.autoMergeable ? 'Yes' : 'No'}`);

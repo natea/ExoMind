@@ -3,17 +3,8 @@
  */
 
 import { Task } from '../../types/task';
-import { TodoistTask } from './types';
-import { SyncConflict, ResolutionStrategy } from './sync-types';
-import { TodoistMapper } from './mapper';
-
-interface ConflictResolverOptions {
-  rules?: {
-    priority?: 'always-higher' | 'always-lower';
-    dueDate?: 'always-earlier' | 'always-later';
-    [key: string]: any;
-  };
-}
+import { TodoistTask, SyncConflict, ResolutionStrategy, ConflictResolverOptions } from './types';
+import { TodoistMapper } from './TodoistMapper';
 
 interface ConflictHistory {
   taskId: string;
@@ -174,7 +165,7 @@ export class ConflictResolver {
    * Resolve by keeping local version
    */
   private resolveLocalWins(conflict: SyncConflict): Task {
-    const local = conflict.localData;
+    const local = conflict.localData as Task;
     return { ...local };
   }
 
@@ -184,7 +175,7 @@ export class ConflictResolver {
   private resolveRemoteWins(conflict: SyncConflict): Task {
     if (conflict.type === 'deletion_conflict' && !conflict.remoteData) {
       // Remote was deleted
-      const local = conflict.localData;
+      const local = conflict.localData as Task;
       return { ...local, status: 'deleted' };
     }
 
@@ -196,7 +187,7 @@ export class ConflictResolver {
    * Resolve by using latest timestamp
    */
   private resolveLatestTimestamp(conflict: SyncConflict): Task {
-    const local = conflict.localData;
+    const local = conflict.localData as Task;
 
     if (conflict.type === 'deletion_conflict') {
       return conflict.remoteData ? this.resolveRemoteWins(conflict) : { ...local, status: 'deleted' };
@@ -213,7 +204,7 @@ export class ConflictResolver {
    * Resolve by merging non-conflicting fields
    */
   private resolveFieldLevelMerge(conflict: SyncConflict): Task {
-    const local = conflict.localData;
+    const local = conflict.localData as Task;
 
     if (conflict.type === 'deletion_conflict') {
       return conflict.remoteData ? this.resolveRemoteWins(conflict) : { ...local, status: 'deleted' };
@@ -262,7 +253,7 @@ export class ConflictResolver {
    * Resolve using custom rules
    */
   private resolveCustomRules(conflict: SyncConflict): Task {
-    const local = conflict.localData;
+    const local = conflict.localData as Task;
 
     if (conflict.type === 'deletion_conflict') {
       return conflict.remoteData ? this.resolveRemoteWins(conflict) : { ...local, status: 'deleted' };

@@ -86,11 +86,6 @@ export class TodoistMapper {
   fromTodoist(todoistTask: TodoistTask, options: MapperOptions = {}): Task {
     const mergedOptions = { ...this.options, ...options };
 
-    // Validate required fields
-    if (!todoistTask.content || !todoistTask.id) {
-      throw new Error('Invalid Todoist task: missing required fields (content, id)');
-    }
-
     // Map priority
     const priority = this.mapPriorityFromTodoist(todoistTask.priority);
 

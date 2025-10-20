@@ -5,7 +5,7 @@
  * for Todoist, Gmail, Calendar, WhatsApp, and Claude Flow.
  */
 
-import { IntegrationStatus, CheckResult, HealthStatus } from '../types/health.js';
+import { IntegrationStatus, CheckResult } from '../types/health.js';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -54,7 +54,7 @@ export async function checkTodoistHealth(): Promise<IntegrationStatus> {
       };
     }
 
-    const projects = await response.json();
+    const projects = await response.json() as unknown[];
 
     return {
       type: 'todoist',
@@ -64,7 +64,7 @@ export async function checkTodoistHealth(): Promise<IntegrationStatus> {
       lastChecked: new Date(),
       responseTimeMs: responseTime,
       details: {
-        projectCount: projects.length,
+        projectCount: Array.isArray(projects) ? projects.length : 0,
         apiVersion: 'v2'
       }
     };

@@ -47,8 +47,8 @@ export class ScheduleAnalyzer {
    */
   calculateTimeAllocation(
     events: CalendarEvent[],
-    startDate: Date,
-    endDate: Date
+    _startDate: Date,
+    _endDate: Date
   ): TimeAllocation[] {
     const categoryMap = new Map<EventCategory, TimeAllocation>();
 
@@ -438,8 +438,8 @@ export class ScheduleAnalyzer {
    */
   analyzeWorkLifeBalance(
     events: CalendarEvent[],
-    startDate: Date,
-    endDate: Date
+    _startDate: Date,
+    _endDate: Date
   ): WorkLifeBalance {
     const workCategories: EventCategory[] = ['work', 'meeting', 'deep-work', 'admin'];
     const personalCategories: EventCategory[] = ['personal', 'health', 'social', 'break'];

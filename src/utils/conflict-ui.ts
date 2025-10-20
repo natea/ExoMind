@@ -45,7 +45,7 @@ export function displayConflict(conflict: TaskConflict): void {
   console.log('╠' + line + '╣');
 
   // Task info
-  console.log('║' + chalk.bold(` Task: "${conflict.localTask.content}"`).padEnd(width + 9) + '║');
+  console.log('║' + chalk.bold(` Task: "${conflict.localTask.title}"`).padEnd(width + 9) + '║');
   console.log('║' + chalk.yellow(` Conflict Type: ${conflict.conflicts.map(c => c.conflictType).join(', ')}`).padEnd(width + 9) + '║');
 
   if (conflict.lastSyncedAt) {
@@ -238,7 +238,7 @@ function promptOptional(rl: readline.Interface, question: string): Promise<strin
  * Display resolution preview before applying
  */
 export function displayResolutionPreview(
-  conflict: TaskConflict,
+  _conflict: TaskConflict,
   choice: ResolutionChoice,
   finalValues: Record<string, any>
 ): void {

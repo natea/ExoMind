@@ -70,10 +70,11 @@ export async function validateSkillStructure(
  */
 export const STANDARD_SKILL_STRUCTURE: Omit<SkillStructure, 'name' | 'description'> = {
   requiredFiles: [
-    'README.md',
-    'index.ts',
+    'SKILL.md',
   ],
   optionalFiles: [
+    'README.md',
+    'index.ts',
     'examples.md',
     'templates/',
     'config.json',

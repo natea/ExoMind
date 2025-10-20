@@ -142,21 +142,23 @@ export class EmailRulesEngine {
     }
 
     // Apply case sensitivity for string comparisons
+    let processedFieldValue = fieldValue;
+    let processedValue = value;
     if (typeof fieldValue === 'string' && typeof value === 'string') {
       if (!caseSensitive) {
-        fieldValue = fieldValue.toLowerCase();
-        value = value.toLowerCase();
+        processedFieldValue = fieldValue.toLowerCase();
+        processedValue = value.toLowerCase();
       }
     }
 
     // Evaluate operator
     switch (operator) {
       case 'contains':
-        return String(fieldValue).includes(String(value));
+        return String(processedFieldValue).includes(String(processedValue));
       case 'equals':
-        return fieldValue === value;
+        return processedFieldValue === processedValue;
       case 'matches':
-        return new RegExp(String(value)).test(String(fieldValue));
+        return new RegExp(String(processedValue)).test(String(processedFieldValue));
       case 'greaterThan':
         return Number(fieldValue) > Number(value);
       case 'lessThan':

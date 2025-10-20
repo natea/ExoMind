@@ -8,12 +8,8 @@
 import {
   HealthReport,
   CheckResult,
-  IntegrationStatus,
-  MemoryHealth,
-  ConfigHealth,
-  TemplateHealth,
-  HealthStatus,
-  HealthFix
+  HealthFix,
+  HealthStatus
 } from '../types/health.js';
 
 /**

@@ -320,7 +320,7 @@ export class TimeBlocker {
   private async scheduleTask(
     task: TaskToSchedule,
     freeSlots: FreeSlot[],
-    existingEvents: CalendarEvent[]
+    _existingEvents: CalendarEvent[]
   ): Promise<TimeBlock | null> {
     // Find best slot based on preferences
     const candidateSlots = freeSlots.filter(slot => {

@@ -24,6 +24,7 @@ export interface TodoistTask {
   url: string;
   comment_count: number;
   created_at: string;
+  updated_at?: string; // Added for conflict detection
   creator_id: string;
   assignee_id?: string;
   assigner_id?: string;
