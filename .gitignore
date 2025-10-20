@@ -31,3 +31,7 @@ hive-mind-prompt-*.txt
 
 # NodeJS
 node_modules/
+
+# Claude Code duplicated skills (use symlinks instead)
+.claude/skills/
+!.claude/skills/.gitkeep

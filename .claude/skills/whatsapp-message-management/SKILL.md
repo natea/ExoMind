@@ -18,10 +18,20 @@ Transform WhatsApp into a powerful life management interface that works seamless
 | Phase | Key Activities | Tool Usage | Output |
 |-------|---------------|------------|--------|
 | **1. Setup** | Configure WhatsApp MCP connection | Check MCP server status | Connected messaging channel |
-| **2. Quick Capture** | Parse incoming messages for tasks/notes | WhatsApp MCP receive, Task creation | Captured items in system |
-| **3. Daily Briefing** | Generate and send morning/evening updates | Read tasks/habits, WhatsApp MCP send | Timely briefings delivered |
-| **4. Habit Check-ins** | Send reminders and log responses | Habit tracking, WhatsApp MCP | Habit streaks maintained |
-| **5. Contextual Queries** | Answer questions using ExoMind knowledge | RAG search, WhatsApp MCP | Informed responses |
+| **2. Quick Capture** | Parse incoming messages for tasks/notes | `mcp__whatsapp__send_message`, Task creation | Captured items in system |
+| **3. Daily Briefing** | Generate and send morning/evening updates | Life OS skills, `mcp__whatsapp__send_message` | Timely briefings delivered |
+| **4. Habit Check-ins** | Send reminders and log responses | Habit tracking, `mcp__whatsapp__send_message` | Habit streaks maintained |
+| **5. Contextual Queries** | Answer questions using ExoMind knowledge | RAG search, `mcp__whatsapp__send_message` | Informed responses |
+
+## Life OS Integration
+
+This skill integrates seamlessly with the Life OS workflow system:
+
+- **daily-planning**: Get morning priorities and tasks for briefings
+- **weekly-review**: Send weekly summaries and reflection prompts
+- **processing-inbox**: Quick capture flows into inbox processing
+- **conducting-life-assessment**: Track progress via daily briefings
+- **goal-setting**: Link daily tasks to quarterly goals
 
 ## When to Use
 
@@ -63,61 +73,265 @@ claude mcp list | grep whatsapp
 # Use appropriate WhatsApp MCP tool to send test message
 ```
 
-### Phase 2: Quick Capture
+### Phase 2: Quick Capture (Enhanced)
 
 **Parse incoming WhatsApp messages for tasks and notes:**
 
 **Capture patterns to recognize:**
 - Task indicators: "remind me", "todo", "task:", "I need to"
 - Note indicators: "note:", "remember", "idea:"
+- Voice note indicators: "voice memo", "audio note"
+- Photo indicators: Image attachments
 - Context indicators: "@work", "@home", "#project-name"
 - Priority indicators: "urgent", "important", "!!!"
 
-**Processing workflow:**
-1. Receive message via WhatsApp MCP
-2. Parse for task/note/habit signals
-3. Extract metadata (tags, priority, context)
-4. Create appropriate item in ExoMind system
-5. Send confirmation back to WhatsApp
+**Enhanced Processing Workflow:**
 
-**Example exchange:**
+```javascript
+// 1. Receive message via WhatsApp MCP
+mcp__whatsapp__list_messages({
+  after: lastCheckTime,
+  limit: 20
+});
+
+// 2. Parse different media types
+async function parseQuickCapture(message) {
+  if (message.hasAudio) {
+    // Voice note to task conversion
+    const transcription = await transcribeVoiceNote(message.audioPath);
+    return parseTaskFromText(transcription);
+  }
+
+  if (message.hasImage) {
+    // Photo capture for reference
+    const imageContext = await analyzeImage(message.imagePath);
+    return {
+      type: 'note',
+      content: message.caption || 'Visual reference',
+      attachment: message.imagePath,
+      context: imageContext
+    };
+  }
+
+  // Text parsing
+  return parseTaskFromText(message.text);
+}
+
+// 3. Create item and add to inbox (processing-inbox skill)
+async function quickCaptureToInbox(parsedItem) {
+  const inboxItem = {
+    content: parsedItem.content,
+    type: parsedItem.type,
+    context: parsedItem.context,
+    priority: parsedItem.priority,
+    tags: parsedItem.tags,
+    source: 'whatsapp',
+    capturedAt: new Date(),
+    attachment: parsedItem.attachment
+  };
+
+  // Add to inbox for later processing
+  await addToInbox(inboxItem);
+
+  // Send confirmation
+  await mcp__whatsapp__send_message({
+    recipient: parsedItem.userPhone,
+    message: formatConfirmation(inboxItem)
+  });
+}
+```
+
+**Enhanced Capture Examples:**
+
+**Text Capture:**
 ```
 User (WhatsApp): "Remind me to call dentist tomorrow @health"
-ExoMind: "✓ Task created: Call dentist (Due: Tomorrow, Context: health)"
-
-User (WhatsApp): "Note: Great book recommendation from Sarah - Atomic Habits"
-ExoMind: "✓ Note saved to your knowledge base"
+ExoMind: "✓ Task added to inbox: Call dentist
+Due: Tomorrow | Context: health
+Process inbox? Reply 'inbox'"
 ```
 
-### Phase 3: Daily Briefing
-
-**Morning Briefing (07:00-09:00):**
-- Today's scheduled tasks (top 5 priority)
-- Active habits to complete today
-- Any overdue items (gentle reminder)
-- Weather/calendar integration (if available)
-
-**Evening Recap (18:00-20:00):**
-- Tasks completed today (celebrate wins)
-- Habits checked off
-- Tomorrow's top priorities preview
-- Reflection prompt (optional)
-
-**Message format:**
+**Voice Note Capture:**
 ```
-☀️ Good morning! Here's your day:
+User (WhatsApp): [Sends voice note: "Remember to buy milk, eggs, and bread on the way home"]
+ExoMind: "🎤 Voice note captured and transcribed:
+✓ Task added to inbox: Buy milk, eggs, and bread
+Context: errands
+Process now? Reply 'yes'"
+```
 
-📋 Top Tasks:
-1. ⚡ Finish project proposal (Due today)
-2. 📞 Call dentist (Due today)
-3. 📧 Review emails from team
+**Photo Capture:**
+```
+User (WhatsApp): [Sends photo of whiteboard with caption "Project ideas from today's meeting"]
+ExoMind: "📸 Photo note saved:
+'Project ideas from today's meeting'
+✓ Added to inbox with visual reference
+View later: Reply 'show photos'"
+```
 
-🎯 Habits:
-• Morning meditation
-• Drink 8 glasses of water
-• Read 30 minutes
+**Quick Batch Capture:**
+```
+User (WhatsApp): "todo: buy groceries, call mom, schedule dentist @personal"
+ExoMind: "✓ 3 tasks added to inbox:
+1. Buy groceries
+2. Call mom
+3. Schedule dentist
 
-Reply "done" + number to mark complete (e.g., "done 1")
+Context: personal | Ready to process? Reply 'inbox'"
+```
+
+**Integration with processing-inbox skill:**
+
+All quick captures flow into the inbox processing workflow:
+1. Capture via WhatsApp → Inbox
+2. User processes inbox (mobile or desktop)
+3. Items converted to tasks, events, or notes
+4. Context and priority preserved throughout
+
+### Phase 3: Daily Briefing (Life OS Integration)
+
+**Morning Briefing Template (07:00-09:00):**
+
+Uses **daily-planning** skill to generate structured morning briefing:
+
+```javascript
+// Integration with daily-planning skill
+const morningBriefing = {
+  priorities: [], // Top 3 tasks from daily plan
+  calendar: [],   // Next 3 meetings/events
+  habits: [],     // Active habits for today
+  energy: null,   // Energy level from yesterday
+  focus: null     // Today's main focus area
+};
+
+// Send via WhatsApp MCP
+mcp__whatsapp__send_message({
+  recipient: userPhoneNumber,
+  message: formatMorningBriefing(morningBriefing)
+});
+```
+
+**Morning Message Format:**
+```
+☀️ Good morning! {Day}, {Date}
+
+🎯 TOP 3 PRIORITIES:
+1. ⚡ {Priority Task 1} ({Time estimate})
+2. ⚡ {Priority Task 2} ({Time estimate})
+3. ⚡ {Priority Task 3} ({Time estimate})
+
+📅 NEXT 3 MEETINGS:
+• {Meeting 1} at {Time}
+• {Meeting 2} at {Time}
+• {Meeting 3} at {Time}
+
+✅ PENDING TASKS: {Count}
+🔄 HABITS: {Count to complete}
+
+💡 Focus: {Today's main focus area}
+⚡ Energy: {Yesterday's energy level}
+
+Reply "done" + number to check off
+Reply "plan" for full daily plan
+```
+
+**Evening Briefing Template (18:00-20:00):**
+
+Uses **daily-planning** skill for retrospective:
+
+```javascript
+// Integration with daily-planning and weekly-review skills
+const eveningBriefing = {
+  wins: [],           // Min 3 wins from today
+  tasksCompleted: 0,  // Count of completed tasks
+  habitsCompleted: 0, // Count of completed habits
+  energy: null,       // Energy level today (1-5)
+  reflection: null,   // Brief reflection prompt
+  tomorrow: []        // Preview of tomorrow's priorities
+};
+
+// Send via WhatsApp MCP
+mcp__whatsapp__send_message({
+  recipient: userPhoneNumber,
+  message: formatEveningBriefing(eveningBriefing)
+});
+```
+
+**Evening Message Format:**
+```
+🌙 Evening recap - {Day}
+
+🎉 TODAY'S WINS (min 3):
+1. {Win 1}
+2. {Win 2}
+3. {Win 3}
+
+✅ COMPLETED:
+• {X} tasks finished
+• {X} habits maintained
+🔥 Active streaks: {List streaks}
+
+⚡ ENERGY CHECK:
+How was your energy today? (1-5)
+Reply with number
+
+💭 REFLECTION:
+{Reflection prompt based on weekly theme}
+
+🔜 TOMORROW PREVIEW:
+Top priority: {Tomorrow's #1 task}
+
+Reply "reflect" to share insights
+Reply "wins" to add more wins
+```
+
+**Weekly Briefing (Sunday Evening):**
+
+Uses **weekly-review** skill:
+
+```javascript
+// Integration with weekly-review skill
+const weeklyBriefing = {
+  weekSummary: {},    // Week's achievements
+  goalProgress: [],   // Progress on quarterly goals
+  nextWeekFocus: null,// Next week's main focus
+  habits: {},         // Habit completion rates
+  reflection: null    // Weekly reflection prompt
+};
+
+// Send via WhatsApp MCP
+mcp__whatsapp__send_message({
+  recipient: userPhoneNumber,
+  message: formatWeeklyBriefing(weeklyBriefing)
+});
+```
+
+**Weekly Message Format:**
+```
+📊 WEEK {Number} SUMMARY
+
+✅ ACCOMPLISHED:
+• {X} tasks completed
+• {X} habits maintained
+• {Key achievements}
+
+🎯 GOAL PROGRESS:
+• {Goal 1}: {X}% complete
+• {Goal 2}: {X}% complete
+• {Goal 3}: {X}% complete
+
+🔥 HABIT STREAKS:
+• {Habit 1}: {X} days
+• {Habit 2}: {X} days
+• {Habit 3}: {X} days
+
+🔜 NEXT WEEK FOCUS:
+{Main focus area for upcoming week}
+
+💭 WEEKLY REFLECTION:
+{Reflection prompt for weekly review}
+
+Ready for weekly review? Reply "review"
 ```
 
 ### Phase 4: Habit Check-ins
@@ -172,12 +386,119 @@ Want to see details for any of these?"
 
 ## Integration
 
-### WhatsApp MCP Server
+### WhatsApp MCP Tools
 **Primary interface for all messaging:**
-- `send_message(phone_number, text)` - Send messages to user
-- `receive_messages()` - Poll for incoming messages
-- `format_message(content, style)` - Format with emojis/markdown
-- `check_connection()` - Verify server status
+
+```javascript
+// Send text messages
+mcp__whatsapp__send_message({
+  recipient: "1234567890",  // Phone number or JID
+  message: "Your briefing text here"
+});
+
+// Send files/images
+mcp__whatsapp__send_file({
+  recipient: "1234567890",
+  media_path: "/absolute/path/to/file.jpg"
+});
+
+// Send voice messages
+mcp__whatsapp__send_audio_message({
+  recipient: "1234567890",
+  media_path: "/absolute/path/to/audio.ogg"
+});
+
+// Receive messages
+mcp__whatsapp__list_messages({
+  after: "2025-01-15T00:00:00Z",
+  limit: 20,
+  include_context: true
+});
+
+// Search messages
+mcp__whatsapp__search_contacts({
+  query: "John"
+});
+
+// Download media from messages
+mcp__whatsapp__download_media({
+  message_id: "msg_123",
+  chat_jid: "1234567890@s.whatsapp.net"
+});
+```
+
+### Life OS Skill Integration
+
+**daily-planning skill:**
+```javascript
+// Get today's priorities for morning briefing
+const dailyPlan = await getDailyPlan(userId);
+const morningBriefing = formatMorningBriefing({
+  priorities: dailyPlan.topThree,
+  meetings: dailyPlan.calendar,
+  habits: dailyPlan.activeHabits
+});
+
+await mcp__whatsapp__send_message({
+  recipient: userPhone,
+  message: morningBriefing
+});
+```
+
+**weekly-review skill:**
+```javascript
+// Generate weekly summary for Sunday briefing
+const weeklyReview = await getWeeklyReview(userId);
+const weeklyBriefing = formatWeeklyBriefing({
+  summary: weeklyReview.achievements,
+  goalProgress: weeklyReview.goals,
+  nextWeek: weeklyReview.nextFocus
+});
+
+await mcp__whatsapp__send_message({
+  recipient: userPhone,
+  message: weeklyBriefing
+});
+```
+
+**processing-inbox skill:**
+```javascript
+// Quick capture flows into inbox
+const capturedItem = parseQuickCapture(whatsappMessage);
+await addToInbox(capturedItem);
+
+await mcp__whatsapp__send_message({
+  recipient: userPhone,
+  message: "✓ Added to inbox for processing"
+});
+```
+
+**conducting-life-assessment skill:**
+```javascript
+// Track energy and reflection via WhatsApp
+const energyCheck = await promptEnergyRating(userPhone);
+const reflection = await promptReflection(userPhone);
+
+await updateLifeAssessment(userId, {
+  energy: energyCheck,
+  reflection: reflection,
+  date: new Date()
+});
+```
+
+**goal-setting skill:**
+```javascript
+// Link daily tasks to quarterly goals in briefings
+const goals = await getQuarterlyGoals(userId);
+const todaysTasks = await getDailyTasks(userId);
+const goalLinkedTasks = linkTasksToGoals(todaysTasks, goals);
+
+// Include in morning briefing
+const briefing = formatMorningBriefing({
+  priorities: goalLinkedTasks,
+  goalContext: goals
+});
+```
 
 ### ExoMind Components
 - **Task Manager**: Create, update, complete tasks from messages
@@ -185,6 +506,7 @@ Want to see details for any of these?"
 - **Knowledge Base (RAG)**: Search notes and context for queries
 - **Calendar Integration**: Pull events for briefings
 - **User Preferences**: DND hours, notification frequency, message style
+- **Inbox System**: Quick capture flows into processing workflow
 
 ## Common Use Cases
 
@@ -325,35 +647,233 @@ Error: "❌ [Issue] - [What to do]"
 
 ## Technical Implementation Notes
 
-### Message Parsing
+### Message Parsing (Enhanced)
 ```javascript
-function parseQuickCapture(message) {
+async function parseQuickCapture(message) {
   const patterns = {
     task: /^(todo:|task:|remind me to)/i,
     note: /^(note:|remember:|idea:)/i,
     habit: /^(done|complete|skip|did)/i,
-    query: /^(show|what|when|find)/i,
+    query: /^(show|what|when|find|plan)/i,
     context: /@(\w+)/g,
     tags: /#(\w+)/g,
-    priority: /(!{1,3}|urgent|important|asap)/i
+    priority: /(!{1,3}|urgent|important|asap)/i,
+    voiceNote: message.hasAudio,
+    photo: message.hasImage
   };
 
+  // Handle voice notes
+  if (patterns.voiceNote) {
+    const audioPath = await mcp__whatsapp__download_media({
+      message_id: message.id,
+      chat_jid: message.chatJid
+    });
+    const transcription = await transcribeAudio(audioPath.file_path);
+    message.text = transcription;
+  }
+
+  // Handle photos
+  if (patterns.photo) {
+    const imagePath = await mcp__whatsapp__download_media({
+      message_id: message.id,
+      chat_jid: message.chatJid
+    });
+    return {
+      type: 'note',
+      content: message.caption || 'Visual reference',
+      attachment: imagePath.file_path,
+      source: 'whatsapp'
+    };
+  }
+
   // Extract type, content, metadata
-  // Return structured object for processing
+  const type = Object.keys(patterns).find(key =>
+    patterns[key] instanceof RegExp && patterns[key].test(message.text)
+  );
+
+  const contexts = [...message.text.matchAll(patterns.context)].map(m => m[1]);
+  const tags = [...message.text.matchAll(patterns.tags)].map(m => m[1]);
+  const hasPriority = patterns.priority.test(message.text);
+
+  return {
+    type: type || 'task',
+    content: message.text.replace(patterns[type] || '', '').trim(),
+    contexts,
+    tags,
+    priority: hasPriority ? 'high' : 'normal',
+    source: 'whatsapp',
+    timestamp: message.timestamp
+  };
+}
+```
+
+### Briefing Generation with Life OS Integration
+
+```javascript
+// Morning briefing using daily-planning skill
+async function generateMorningBriefing(userId) {
+  // Get data from Life OS skills
+  const dailyPlan = await getDailyPlan(userId);
+  const calendar = await getCalendarEvents(userId, 'today');
+  const habits = await getActiveHabits(userId);
+  const energy = await getLastEnergyLevel(userId);
+
+  const briefing = `☀️ Good morning! ${formatDate('today')}
+
+🎯 TOP 3 PRIORITIES:
+${dailyPlan.priorities.slice(0, 3).map((t, i) =>
+  `${i + 1}. ⚡ ${t.title} (${t.timeEstimate})`
+).join('\n')}
+
+📅 NEXT 3 MEETINGS:
+${calendar.slice(0, 3).map(e =>
+  `• ${e.title} at ${formatTime(e.start)}`
+).join('\n')}
+
+✅ PENDING TASKS: ${dailyPlan.pendingCount}
+🔄 HABITS: ${habits.filter(h => !h.completedToday).length}
+
+💡 Focus: ${dailyPlan.mainFocus}
+⚡ Energy: ${energy ? energy.level + '/5' : 'Not tracked'}
+
+Reply "done" + number to check off
+Reply "plan" for full daily plan`;
+
+  return briefing;
+}
+
+// Evening briefing using daily-planning and weekly-review skills
+async function generateEveningBriefing(userId) {
+  const completed = await getCompletedTasks(userId, 'today');
+  const habits = await getCompletedHabits(userId, 'today');
+  const streaks = await getActiveStreaks(userId);
+  const tomorrow = await getTomorrowPriorities(userId);
+  const reflectionPrompt = await getReflectionPrompt(userId);
+
+  const briefing = `🌙 Evening recap - ${formatDate('today')}
+
+🎉 TODAY'S WINS (min 3):
+${completed.slice(0, 3).map((t, i) =>
+  `${i + 1}. ${t.title}`
+).join('\n')}
+
+✅ COMPLETED:
+• ${completed.length} tasks finished
+• ${habits.length} habits maintained
+🔥 Active streaks: ${streaks.map(s => s.name + ' (' + s.days + 'd)').join(', ')}
+
+⚡ ENERGY CHECK:
+How was your energy today? (1-5)
+Reply with number
+
+💭 REFLECTION:
+${reflectionPrompt}
+
+🔜 TOMORROW PREVIEW:
+Top priority: ${tomorrow[0]?.title || 'Not set'}
+
+Reply "reflect" to share insights
+Reply "wins" to add more wins`;
+
+  return briefing;
+}
+
+// Weekly briefing using weekly-review skill
+async function generateWeeklyBriefing(userId) {
+  const weekReview = await getWeeklyReview(userId);
+  const goalProgress = await getGoalProgress(userId);
+  const habitStats = await getWeeklyHabitStats(userId);
+
+  const briefing = `📊 WEEK ${weekReview.weekNumber} SUMMARY
+
+✅ ACCOMPLISHED:
+• ${weekReview.tasksCompleted} tasks completed
+• ${weekReview.habitsCompleted} habits maintained
+• ${weekReview.keyAchievements.join('\n• ')}
+
+🎯 GOAL PROGRESS:
+${goalProgress.map(g =>
+  `• ${g.name}: ${g.progress}% complete`
+).join('\n')}
+
+🔥 HABIT STREAKS:
+${habitStats.map(h =>
+  `• ${h.name}: ${h.streak} days`
+).join('\n')}
+
+🔜 NEXT WEEK FOCUS:
+${weekReview.nextWeekFocus}
+
+💭 WEEKLY REFLECTION:
+${weekReview.reflectionPrompt}
+
+Ready for weekly review? Reply "review"`;
+
+  return briefing;
 }
 ```
 
 ### Scheduling
-- Use cron jobs or scheduled tasks for briefings
-- Store user timezone for correct timing
-- Respect Do Not Disturb windows
-- Queue messages if user is inactive
+```javascript
+// Use cron jobs for automated briefings
+const cron = require('node-cron');
+
+// Morning briefing at 7:30 AM user's timezone
+cron.schedule('30 7 * * *', async () => {
+  const users = await getActiveUsers();
+  for (const user of users) {
+    if (!isInDNDHours(user)) {
+      const briefing = await generateMorningBriefing(user.id);
+      await mcp__whatsapp__send_message({
+        recipient: user.phone,
+        message: briefing
+      });
+    }
+  }
+}, {
+  timezone: user.timezone
+});
+
+// Evening briefing at 7:00 PM
+cron.schedule('0 19 * * *', async () => {
+  const users = await getActiveUsers();
+  for (const user of users) {
+    if (!isInDNDHours(user)) {
+      const briefing = await generateEveningBriefing(user.id);
+      await mcp__whatsapp__send_message({
+        recipient: user.phone,
+        message: briefing
+      });
+    }
+  }
+}, {
+  timezone: user.timezone
+});
+
+// Weekly briefing on Sunday at 6:00 PM
+cron.schedule('0 18 * * 0', async () => {
+  const users = await getActiveUsers();
+  for (const user of users) {
+    if (!isInDNDHours(user)) {
+      const briefing = await generateWeeklyBriefing(user.id);
+      await mcp__whatsapp__send_message({
+        recipient: user.phone,
+        message: briefing
+      });
+    }
+  }
+}, {
+  timezone: user.timezone
+});
+```
 
 ### State Management
 - Track conversation context within session
 - Remember last 10 interactions for continuity
 - Clear session after 30 minutes of inactivity
 - Persist user preferences across sessions
+- Store briefing history for pattern analysis
+- Link WhatsApp interactions to Life OS data
 
 ## Privacy & Security
 
@@ -466,6 +986,49 @@ Connected to 2 related notes.
 
 Back to PR #234 review?"
 ```
+
+## Life OS Command Reference
+
+Quick commands users can send via WhatsApp:
+
+### Briefing Commands
+- `"morning"` or `"briefing"` - Get current morning briefing
+- `"evening"` or `"recap"` - Get evening recap
+- `"weekly"` - Get weekly summary
+- `"plan"` - Get full daily plan
+
+### Task Management
+- `"done 1"` - Mark task #1 as complete
+- `"done [task name]"` - Mark named task as complete
+- `"tasks"` - List all pending tasks
+- `"todo: [task]"` - Quick add task to inbox
+
+### Habit Tracking
+- `"done [habit]"` - Log habit completion
+- `"skip [habit]"` - Skip habit for today
+- `"streaks"` - Show all active streaks
+- `"habits"` - List today's habits
+
+### Inbox Processing
+- `"inbox"` - Show inbox count
+- `"process"` - Start inbox processing
+- `"capture: [item]"` - Quick capture to inbox
+
+### Energy & Reflection
+- `"energy [1-5]"` - Log energy level
+- `"reflect"` - Start reflection prompt
+- `"wins"` - Add today's wins
+- `"wins [text]"` - Quick add win
+
+### Context & Projects
+- `"show [project]"` - Show project tasks
+- `"focus [area]"` - Set focus area
+- `"context @[name]"` - Switch context
+
+### Weekly Review
+- `"review"` - Start weekly review
+- `"goals"` - Show goal progress
+- `"next week"` - Set next week focus
 
 ---
 
