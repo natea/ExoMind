@@ -305,6 +305,8 @@ class GmailErrorHandler {
 
 ## 3. Google Keep Integration
 
+> ⏸️ **STATUS: DEFERRED** - Google Keep integration is on hold due to lack of official API. Consider using Todoist quick capture or WhatsApp for rapid note capture instead.
+
 ### Purpose
 Quick capture, notes, and idea management.
 
@@ -320,9 +322,11 @@ pip install keep
 ```
 
 #### Option B: Google Tasks API (Alternative)
+> ⏸️ **Also DEFERRED** - Todoist already handles task management in Phase 4. Google Tasks integration is not needed.
 ```bash
-# Use Google Tasks as Keep alternative
+# Use Google Tasks as Keep alternative (if Keep were implemented)
 # Official API with similar functionality
+# NOT NEEDED: Todoist handles all task management
 ```
 
 #### Option C: Chrome Extension Bridge (Recommended)
@@ -346,7 +350,7 @@ GOOGLE_KEEP_PASSWORD=<app_password>  // Use App Password, not main password
 - Chrome extension: Use content security policy
 - Webhook: Verify HMAC signature
 - App passwords: Store in system keychain
-- Consider Google Tasks API as official alternative
+- ~~Consider Google Tasks API as official alternative~~ (Deferred - use Todoist instead)
 - Never store passwords in plaintext
 
 ### Data Sync Strategy
@@ -598,221 +602,163 @@ class ChromeBookmarksErrorHandler {
 
 ---
 
-## 5. Telegram Integration
+## 5. WhatsApp Message Management
+
+> ✅ **SIMPLIFIED INTEGRATION** - Uses existing WhatsApp MCP server. No custom integration code needed - only a Claude Skills wrapper.
 
 ### Purpose
-Communication hub, notifications, and command interface.
+Mobile-first communication hub for quick capture, daily briefings, and habit tracking.
 
-### Available Integration Methods
+### Integration Approach
 
-#### Option A: Telegram Bot API (Recommended)
-- **Authentication**: Bot Token (from @BotFather)
-- **Methods**:
-  - `sendMessage` - Send notifications
-  - `getUpdates` - Poll for messages
-  - Webhooks - Real-time updates
+**Skill Wrapper Only:**
+- WhatsApp MCP server already handles message sending/receiving
+- Life-OS provides `managing-whatsapp-messages` skill (SKILL.md)
+- No webhook setup required
+- No bot token registration needed
+- Claude Code coordinates via skill invocation
 
-#### Option B: Telegram Client API (MTProto)
-- For user account automation
-- More complex, requires phone number
+### Architecture
 
-### Credential Management
-
-```typescript
-// Bot API approach
-TELEGRAM_BOT_TOKEN=<bot_token_from_botfather>
-TELEGRAM_WEBHOOK_URL=https://your-domain.com/telegram/webhook
-TELEGRAM_WEBHOOK_SECRET=<random_secret_token>
-
-// For user notifications
-TELEGRAM_USER_ID=<your_numeric_user_id>
-
-// Storage
-~/.config/life-os/credentials/telegram.json
-{
-  "bot_token": "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11",
-  "webhook_secret": "random_secret_string_here",
-  "authorized_users": [123456789, 987654321]
-}
-```
-
-**Security Best Practices:**
-- Never expose bot token publicly
-- Use webhook secret to verify requests
-- Whitelist authorized user IDs
-- Implement rate limiting per user
-- Use HTTPS for webhook endpoint
-- Validate all incoming commands
-- Store tokens in environment variables
-
-### Data Sync Strategy
-
-**Bidirectional Communication:**
+**MCP-Based Flow:**
 ```mermaid
 graph LR
-    A[Telegram Bot] -->|Webhook| B[API Gateway]
-    B -->|Process Command| C[Claude Skills]
-    C -->|Generate Response| D[Response Handler]
-    D -->|Send Message| A
-    C -->|Notifications| A
+    A[WhatsApp MCP] -->|Messages| B[Claude Skills]
+    B -->|Skill Wrapper| C[Life-OS Logic]
+    C -->|Commands| D[Task/Habit/Review Actions]
+    D -->|Responses| B
+    B -->|Send Message| A
 ```
 
-**Message Types:**
-- Commands: `/task add "Buy groceries"`
-- Queries: `/list today`
-- Quick capture: Send message to bot
-- File uploads: Documents, images, voice notes
-- Inline keyboards: Interactive menus
+**Key Difference from Traditional Integration:**
+- **Traditional**: Build bot → Register webhook → Handle events → Write integration code
+- **Life-OS Approach**: Create SKILL.md → Use existing MCP → Coordinate actions via hooks
+
+### Skill-Based Commands
+
+Commands processed by `skills/managing-whatsapp-messages/SKILL.md`:
+
+```
+/inbox <item>        - Add to GTD inbox
+/task <task>         - Create next action
+/done <task>         - Complete task
+/review              - Get daily summary
+/goals               - View active plans
+/habits              - Log habit check-in
+/assess              - Quick life area check-in
+```
+
+### Integration Setup
+
+**Step 1: Ensure WhatsApp MCP is Available**
+```bash
+# Verify MCP server is configured
+claude mcp list | grep whatsapp
+
+# If not installed, add it
+claude mcp add whatsapp <installation-command>
+```
+
+**Step 2: No Additional Configuration Needed**
+- The skill file (`skills/managing-whatsapp-messages/SKILL.md`) coordinates everything
+- Claude Code invokes MCP tools as needed
+- No credential management (handled by MCP)
+- No webhook infrastructure
 
 ### Data Flow
 
+**Message Capture:**
 ```typescript
-interface TelegramUpdate {
-  update_id: number;
-  message?: {
-    message_id: number;
-    from: { id: number; username: string };
-    chat: { id: number; type: string };
-    text?: string;
-    voice?: { file_id: string };
-    document?: { file_id: string; file_name: string };
-  };
-  callback_query?: {
-    id: string;
-    from: { id: number };
-    data: string;
-  };
-}
+// Simplified - handled by skill + MCP
+// NO custom integration code needed
 
-// Webhook Handler
-async function handleTelegramWebhook(req: Request): Promise<void> {
-  // Verify webhook secret
-  const token = req.headers.get('X-Telegram-Bot-Api-Secret-Token');
-  if (token !== TELEGRAM_WEBHOOK_SECRET) {
-    throw new SecurityError('Invalid webhook secret');
-  }
-
-  const update: TelegramUpdate = req.body;
-
-  if (update.message?.text) {
-    await handleTextMessage(update.message);
-  } else if (update.message?.voice) {
-    await handleVoiceMessage(update.message);
-  } else if (update.callback_query) {
-    await handleCallbackQuery(update.callback_query);
-  }
-}
-
-// Command Processing
-async function handleTextMessage(message: TelegramMessage): Promise<void> {
-  const userId = message.from.id;
-
-  // Verify authorized user
-  if (!isAuthorized(userId)) {
-    await sendMessage(userId, 'Unauthorized access. Please contact admin.');
-    return;
-  }
-
-  const text = message.text;
-
-  if (text.startsWith('/')) {
-    // Parse command
-    const [command, ...args] = text.slice(1).split(' ');
-
-    switch (command) {
-      case 'task':
-        await handleTaskCommand(userId, args);
-        break;
-      case 'list':
-        await handleListCommand(userId, args);
-        break;
-      case 'help':
-        await sendHelpMessage(userId);
-        break;
-      default:
-        await sendMessage(userId, `Unknown command: ${command}`);
-    }
-  } else {
-    // Quick capture
-    await skillsEngine.createNote({
-      content: text,
-      source: 'telegram',
-      sourceId: message.message_id.toString(),
-      createdBy: userId.toString()
-    });
-
-    await sendMessage(userId, '✅ Note captured!');
-  }
-}
-
-// Notifications from Claude Skills → Telegram
-async function sendNotification(notification: Notification): Promise<void> {
-  const message = formatNotification(notification);
-
-  await bot.sendMessage(TELEGRAM_USER_ID, message, {
-    parse_mode: 'Markdown',
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: '✅ Mark Done', callback_data: `complete:${notification.taskId}` },
-          { text: '⏰ Snooze', callback_data: `snooze:${notification.taskId}` }
-        ]
-      ]
-    }
-  });
-}
-
-// Interactive Callbacks
-async function handleCallbackQuery(query: CallbackQuery): Promise<void> {
-  const [action, taskId] = query.data.split(':');
-
-  switch (action) {
-    case 'complete':
-      await skillsEngine.completeTask(taskId);
-      await bot.answerCallbackQuery(query.id, { text: '✅ Task completed!' });
-      break;
-    case 'snooze':
-      await skillsEngine.snoozeTask(taskId, 3600); // 1 hour
-      await bot.answerCallbackQuery(query.id, { text: '⏰ Snoozed for 1 hour' });
-      break;
-  }
-}
+// Skill coordinates MCP calls:
+// 1. User sends WhatsApp message
+// 2. WhatsApp MCP receives it
+// 3. Skill parses command
+// 4. Skill updates memory/tasks
+// 5. Skill sends confirmation via MCP
 ```
+
+**Daily Briefing:**
+```typescript
+// Triggered by skill hooks
+// Morning routine (5:30 AM):
+await whatsappSkill.sendBriefing({
+  type: 'morning',
+  include: ['today-tasks', 'calendar', 'habits']
+});
+
+// Evening review (8:30 PM):
+await whatsappSkill.sendBriefing({
+  type: 'evening',
+  include: ['completed-tasks', 'tomorrow-preview', 'reflection']
+});
+```
+
+**Habit Check-ins:**
+```typescript
+// Skill manages habit reminders
+// User replies via WhatsApp
+// Skill updates habit tracking in memory
+```
+
+### Advantages of Skill-Based Approach
+
+1. **No Integration Code**: MCP handles all WhatsApp communication
+2. **Simplified Setup**: Just create SKILL.md file
+3. **Portable**: Works wherever WhatsApp MCP is available
+4. **Maintainable**: Skill updates don't require MCP changes
+5. **Coordinated**: Hooks enable pre/post-task automation
 
 ### Error Handling
 
+Since MCP handles communication, error handling is minimal:
+
 ```typescript
-class TelegramErrorHandler {
-  async handle(error: TelegramError): Promise<void> {
-    switch (error.error_code) {
-      case 401:
-        // Invalid bot token
-        await this.notifyAdmin('Invalid Telegram bot token');
+// Skill-level error handling only
+class WhatsAppSkillErrorHandler {
+  async handle(error: SkillError): Promise<void> {
+    switch (error.type) {
+      case 'MCP_UNAVAILABLE':
+        // Fall back to local logging
+        await this.logToFile(error.message);
         break;
-      case 403:
-        // Bot blocked by user
-        await this.handleBlockedUser(error.userId);
-        break;
-      case 429:
-        // Rate limit exceeded
-        await this.backoff(error.retry_after);
-        break;
-      case 400:
-        // Bad request - invalid parameters
-        await this.logInvalidRequest(error);
+      case 'COMMAND_PARSE_ERROR':
+        // Send help message
+        await this.sendHelpMessage();
         break;
       default:
-        await this.logAndNotify(error);
+        await this.logError(error);
     }
-  }
-
-  private async handleBlockedUser(userId: number): Promise<void> {
-    // Remove user from notification list
-    await database.update('users', userId, { telegram_notifications: false });
-    console.log(`User ${userId} blocked the bot`);
   }
 }
 ```
+
+### Security Considerations
+
+**No Credentials Needed:**
+- WhatsApp MCP manages authentication
+- Life-OS skill has no access to WhatsApp API directly
+- Security handled at MCP layer
+
+**Message Validation:**
+- Skill validates command format
+- Sanitizes user input before storing
+- Rate limiting via skill hooks (if needed)
+
+### Implementation Timeline
+
+**Week 10 (2-3 days):**
+1. ✅ Create `skills/managing-whatsapp-messages/SKILL.md`
+2. ✅ Define command parsing logic in skill
+3. ✅ Add message formatting templates
+4. ✅ Configure SessionStart hooks for briefings
+5. ✅ Test with WhatsApp MCP
+
+**No webhook infrastructure needed**
+**No bot registration required**
+**No custom integration code**
 
 ---
 
@@ -827,9 +773,9 @@ class IntegrationHub {
   constructor() {
     this.adapters.set('todoist', new TodoistAdapter());
     this.adapters.set('gmail', new GmailAdapter());
-    this.adapters.set('keep', new KeepAdapter());
+    this.adapters.set('keep', new KeepAdapter());  // Deferred - no official API
     this.adapters.set('chrome', new ChromeAdapter());
-    this.adapters.set('telegram', new TelegramAdapter());
+    this.adapters.set('whatsapp', new WhatsAppSkillAdapter());  // Skill wrapper only
   }
 
   async syncAll(): Promise<void> {
@@ -861,11 +807,11 @@ class IntegrationHub {
 graph TB
     A[Todoist] -->|Event| E[Event Bus]
     B[Gmail] -->|Event| E
-    C[Keep] -->|Event| E
+    C[Keep - Deferred] -.->|Event| E
     D[Chrome] -->|Event| E
-    F[Telegram] -->|Event| E
+    F[WhatsApp MCP] -->|Skill Wrapper| G[Claude Skills]
 
-    E -->|Subscribe| G[Claude Skills]
+    E -->|Subscribe| G
     E -->|Subscribe| H[Analytics]
     E -->|Subscribe| I[Backup Service]
 
@@ -935,9 +881,9 @@ class CredentialVault {
 |---------|-------------|---------------|----------|-------------|
 | Todoist | API Token / OAuth | Keychain | 90 days | Yes |
 | Gmail | OAuth 2.0 | Encrypted file | Auto | Required |
-| Keep | App Password | Keychain | 180 days | Yes |
+| Keep (Deferred) | App Password | Keychain | 180 days | Yes |
 | Chrome | Extension API | None needed | N/A | N/A |
-| Telegram | Bot Token | Environment | Never | N/A |
+| WhatsApp | MCP Managed | MCP Server | MCP Handled | MCP Handled |
 
 ### Data Privacy
 
@@ -1029,7 +975,7 @@ services:
       - NODE_ENV=development
       - TODOIST_API_TOKEN=${TODOIST_API_TOKEN}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      # WhatsApp MCP manages authentication - no tokens needed here
     volumes:
       - ./src:/app/src
       - ~/.config/life-os:/root/.config/life-os:ro
@@ -1093,7 +1039,7 @@ class IntegrationMetrics {
 
 // Health checks
 async function checkIntegrationHealth(): Promise<HealthStatus> {
-  const services = ['todoist', 'gmail', 'telegram'];
+  const services = ['todoist', 'gmail', 'whatsapp'];  // WhatsApp via MCP
   const results = await Promise.all(
     services.map(async service => ({
       service,
@@ -1112,15 +1058,16 @@ async function checkIntegrationHealth(): Promise<HealthStatus> {
 
 ## Implementation Roadmap
 
-### Phase 1: Core Integrations (Week 1-2)
+### Phase 1: Core Integrations (Week 8-10)
 - ✅ Todoist integration (MCP or direct API)
 - ✅ Gmail integration (Google Workspace MCP)
-- ✅ Telegram bot setup and commands
+- ✅ Google Calendar integration (schedule management)
+- ✅ WhatsApp skill wrapper (2-3 days)
 
-### Phase 2: Extension Development (Week 3-4)
-- ✅ Chrome bookmarks extension
-- ✅ Keep capture extension
-- ✅ Webhook infrastructure
+### Phase 2: Extension Development (Optional - Week 13+)
+- ⏸️ Chrome bookmarks extension (deferred to Phase 6)
+- ⏸️ Keep capture extension (deferred - no official API)
+- ❌ Webhook infrastructure (not needed - MCP handles communication)
 
 ### Phase 3: Sync & Reliability (Week 5-6)
 - ✅ Event bus implementation
@@ -1184,16 +1131,20 @@ describe('Gmail Integration', () => {
 
 ```typescript
 describe('Cross-Integration Workflow', () => {
-  it('should sync task from Telegram to Todoist', async () => {
-    // Send message via Telegram
-    await bot.sendMessage('/task add "Buy groceries"');
+  it('should sync task from WhatsApp to Todoist', async () => {
+    // Send message via WhatsApp skill
+    await whatsappSkill.handleMessage('/task add "Buy groceries"');
 
     // Wait for sync
     await wait(2000);
 
-    // Check task in Todoist
-    const tasks = await todoistClient.getTasks();
-    expect(tasks.find(t => t.content === 'Buy groceries')).toBeDefined();
+    // Check task created in memory
+    const memoryTasks = await readMemoryFile('memory/tasks/inbox.md');
+    expect(memoryTasks).toContain('Buy groceries');
+
+    // Check task synced to Todoist
+    const todoistTasks = await todoistClient.getTasks();
+    expect(todoistTasks.find(t => t.content === 'Buy groceries')).toBeDefined();
   });
 });
 ```

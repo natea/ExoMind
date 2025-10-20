@@ -1,6 +1,12 @@
 # Credential Setup Guide
 
-This guide walks through obtaining credentials for each integration service.
+> **Local-Only Operation**: Life-OS runs locally with simplified authentication. No OAuth flows or webhook infrastructure needed.
+
+This guide walks through obtaining credentials for the 4 core integrations:
+1. **Todoist** - Task management
+2. **Gmail** - Email processing (Google Workspace MCP)
+3. **Google Calendar** - Schedule management (Google Workspace MCP)
+4. **WhatsApp** - Mobile messaging (WhatsApp MCP handles authentication)
 
 ---
 
@@ -30,157 +36,103 @@ This guide walks through obtaining credentials for each integration service.
 
 ---
 
-## 2. Gmail / Google Workspace
+## 2. Gmail / Google Workspace (via MCP)
 
-### OAuth 2.0 Setup (Required)
+> ✅ **Simplified**: Google Workspace MCP handles all authentication automatically.
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Enable **Gmail API**:
-   - Navigate to **APIs & Services** → **Library**
-   - Search "Gmail API" and enable it
-4. Create OAuth 2.0 credentials:
-   - Go to **APIs & Services** → **Credentials**
-   - Click **Create Credentials** → **OAuth client ID**
-   - Choose **Desktop app** or **Web application**
-   - Add authorized redirect URI: `http://localhost:3000/auth/google/callback`
-5. Download the JSON credentials file
-6. Store credentials:
+### Setup
+
+1. Install Google Workspace MCP server (if not already installed):
    ```bash
-   export GOOGLE_CLIENT_ID="your_client_id.apps.googleusercontent.com"
-   export GOOGLE_CLIENT_SECRET="your_client_secret"
+   # MCP server handles OAuth flow automatically
+   claude mcp add google-workspace
    ```
 
-### Required Scopes
+2. First time: MCP will prompt you to authenticate:
+   - Opens browser for Google login
+   - Requests minimal required permissions
+   - Stores credentials securely
 
-```
-https://www.googleapis.com/auth/gmail.readonly
-https://www.googleapis.com/auth/gmail.modify
-https://www.googleapis.com/auth/gmail.send
-```
+3. No manual credential management needed!
 
-### Initial OAuth Flow
-
-Run the authentication script:
-```bash
-npm run auth:google
-```
-
-This will:
-1. Open browser for Google login
-2. Request permissions
-3. Save refresh token to `~/.config/life-os/credentials/google-oauth.json`
+### What MCP Handles
+- Gmail API access (read, modify, send)
+- Google Calendar API (events, schedules)
+- OAuth 2.0 token management
+- Automatic token refresh
+- Secure credential storage
 
 ---
 
-## 3. Google Keep
+## 3. Google Keep Integration
 
-### Warning: No Official API
+> ⏸️ **STATUS: DEFERRED** - No official API available.
 
-Google Keep does not have an official public API. Choose one of these approaches:
+**Alternatives for Quick Capture:**
+- Use **Todoist** quick add (coming in Week 8)
+- Use **WhatsApp** messages (coming in Week 10)
+- Use `memory/inbox.md` for immediate capture
 
-### Option A: Use Google Tasks Instead (Recommended)
-
-1. Follow Gmail OAuth setup above
-2. Enable **Google Tasks API** in Cloud Console
-3. Use same credentials
-4. Add scope: `https://www.googleapis.com/auth/tasks`
-
-### Option B: Chrome Extension (Custom Solution)
-
-1. No API credentials needed
-2. Extension uses Chrome's `bookmarks` permission
-3. Data transferred via local webhook
-
-### Option C: Unofficial Keep API (Use at Own Risk)
-
-1. Enable 2FA on your Google account
-2. Generate an [App Password](https://myaccount.google.com/apppasswords)
-3. Store credentials:
-   ```bash
-   export GOOGLE_KEEP_EMAIL="your_email@gmail.com"
-   export GOOGLE_KEEP_APP_PASSWORD="16_character_password"
-   ```
-
-**⚠️ Not recommended for production use**
+Google Keep integration is deferred indefinitely due to:
+- No official Google Keep API
+- Unofficial solutions are unreliable
+- Better alternatives available (Todoist + WhatsApp)
 
 ---
 
-## 4. Chrome Bookmarks
+## 4. Google Calendar (via MCP)
 
-### Method 1: Chrome Extension (Recommended)
+> ✅ **Included with Google Workspace MCP** - Same authentication as Gmail.
 
-No API credentials needed. Extension installation:
+### Setup
 
-1. Download extension from `/extensions/chrome-bookmarks`
-2. Go to `chrome://extensions`
-3. Enable **Developer mode**
-4. Click **Load unpacked**
-5. Select the extension folder
+Automatically configured when you set up Google Workspace MCP (Section 2).
 
-### Method 2: Remote Debugging Protocol (Advanced)
+### Features Available
+- Fetch calendar events
+- Create/modify events
+- Schedule analysis
+- Time blocking
+- Conflict detection
 
-Launch Chrome with debugging enabled:
-```bash
-# macOS
-/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
-
-# Linux
-google-chrome --remote-debugging-port=9222
-
-# Windows
-"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222
-```
-
-Configure:
-```bash
-export CHROME_DEBUGGING_PORT=9222
-```
+No additional credentials needed!
 
 ---
 
-## 5. Telegram Bot
+## 5. WhatsApp Message Management (via MCP)
 
-### Create Bot
+> ✅ **Simplified**: WhatsApp MCP handles all authentication and messaging.
 
-1. Open Telegram and search for [@BotFather](https://t.me/botfather)
-2. Send `/newbot` command
-3. Choose a name and username for your bot
-4. Copy the **API Token** provided
-5. Store token:
+### Setup
+
+1. Install WhatsApp MCP server:
    ```bash
-   export TELEGRAM_BOT_TOKEN="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+   # Check if available
+   claude mcp list | grep whatsapp
+
+   # Install if needed
+   claude mcp add whatsapp <installation-command>
    ```
 
-### Get Your User ID
+2. MCP handles authentication:
+   - No bot token needed
+   - No webhook configuration
+   - Authentication managed by MCP server
 
-1. Search for [@userinfobot](https://t.me/userinfobot) in Telegram
-2. Start a chat
-3. Bot will send your numeric user ID
-4. Store ID:
-   ```bash
-   export TELEGRAM_USER_ID="123456789"
-   ```
+3. Life-OS provides skill wrapper only:
+   - Located at: `skills/managing-whatsapp-messages/SKILL.md`
+   - No credential management in Life-OS code
+   - Coordinates via MCP tool calls
 
-### Configure Webhook (Production)
+### No Manual Configuration Required!
 
-```bash
-curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://your-domain.com/telegram/webhook",
-    "secret_token": "your_random_secret_here"
-  }'
-```
+WhatsApp MCP manages all:
+- Authentication
+- Message sending/receiving
+- Rate limiting
+- Error handling
 
-Store webhook secret:
-```bash
-export TELEGRAM_WEBHOOK_SECRET="your_random_secret_here"
-```
-
-### Test Bot
-
-Send `/start` to your bot in Telegram to verify it's working.
+Life-OS skill just defines commands and workflows.
 
 ---
 
@@ -223,23 +175,17 @@ cmdkey /list | findstr life-os
 Create `.env.local` (DO NOT COMMIT):
 
 ```bash
-# Todoist
+# Todoist (only integration requiring manual token)
 TODOIST_API_TOKEN=your_token
 
-# Google
-GOOGLE_CLIENT_ID=your_client_id
-GOOGLE_CLIENT_SECRET=your_client_secret
+# Google Workspace MCP manages these automatically:
+# - Gmail authentication
+# - Calendar authentication
 
-# Telegram
-TELEGRAM_BOT_TOKEN=your_bot_token
-TELEGRAM_USER_ID=your_user_id
-TELEGRAM_WEBHOOK_SECRET=your_secret
+# WhatsApp MCP manages authentication automatically
 
-# Chrome
-CHROME_DEBUGGING_PORT=9222
-
-# Security
-WEBHOOK_SECRET=random_secret_for_chrome_extension
+# Memory path (optional)
+MEMORY_PATH=./memory
 ```
 
 Load in application:
@@ -248,17 +194,20 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 ```
 
-### Encrypted Config File (Production)
+### Encrypted Config File (Optional for Production)
 
 ```typescript
 // config/credentials.encrypted.json (committed)
 {
-  "todoist": "U2FsdGVkX1...",  // Encrypted token
-  "google": "U2FsdGVkX1...",
-  "telegram": "U2FsdGVkX1..."
+  "todoist": "U2FsdGVkX1..."  // Only Todoist needs manual token
 }
 
-// Decrypt at runtime
+// MCP-based integrations (Gmail, Calendar, WhatsApp):
+// - Credentials managed by respective MCP servers
+// - No manual encryption needed
+// - Automatic secure storage
+
+// Decrypt Todoist token at runtime
 const credentials = await decryptConfig(
   'config/credentials.encrypted.json',
   process.env.ENCRYPTION_KEY
@@ -267,21 +216,25 @@ const credentials = await decryptConfig(
 
 ---
 
-## Security Checklist
+## Security Checklist (Simplified for Local-Only Operation)
 
-- [ ] Never commit credentials to git
+**Manual Credentials (Todoist only):**
+- [ ] Never commit `.env.local` to git
 - [ ] Add `.env.local` to `.gitignore`
-- [ ] Use OAuth 2.0 when available
-- [ ] Enable 2FA on all accounts
-- [ ] Rotate tokens every 90 days
-- [ ] Use app passwords instead of account passwords
-- [ ] Restrict API permissions to minimum required
-- [ ] Monitor API usage for anomalies
-- [ ] Use HTTPS for all webhook endpoints
-- [ ] Implement rate limiting
-- [ ] Log all authentication attempts
-- [ ] Encrypt credentials at rest
-- [ ] Use secrets management in production (Vault, AWS Secrets Manager)
+- [ ] Store Todoist token in system keychain (optional)
+- [ ] Rotate Todoist token every 90 days
+
+**MCP-Managed Credentials (Gmail, Calendar, WhatsApp):**
+- [ ] Enable 2FA on Google account
+- [ ] Trust MCP servers to handle OAuth flows
+- [ ] MCP automatically encrypts credentials at rest
+- [ ] MCP handles token refresh automatically
+
+**Simplified Security Model:**
+- ✅ No webhook endpoints needed (local-only)
+- ✅ No production deployment concerns
+- ✅ MCP handles OAuth complexity
+- ✅ Minimal credential exposure
 
 ---
 
@@ -295,44 +248,48 @@ npm run verify-credentials
 
 This will check:
 - ✅ Todoist API connectivity
-- ✅ Gmail OAuth token validity
-- ✅ Chrome extension installation
-- ✅ Telegram bot responsiveness
-- ✅ Webhook endpoint availability
+- ✅ Google Workspace MCP authentication (Gmail + Calendar)
+- ✅ WhatsApp MCP availability
+- ✅ Memory directory structure
 
 ---
 
 ## Troubleshooting
 
-### "Invalid token" errors
+### Todoist "Invalid token" errors
 - Check token hasn't expired
-- Verify correct token copied
-- Try regenerating token
+- Verify correct token copied (no extra spaces)
+- Try regenerating token from Todoist settings
 
-### OAuth "redirect_uri_mismatch"
-- Ensure redirect URI matches exactly in Cloud Console
-- Include protocol (`http://` or `https://`)
-- Check for trailing slashes
+### Google Workspace MCP authentication issues
+- Run `claude mcp list` to verify MCP is installed
+- Remove and re-add MCP server if authentication fails
+- Check that Google account has 2FA enabled
+- MCP will automatically prompt for re-authentication
 
-### Webhook not receiving events
-- Verify HTTPS endpoint (required for Telegram)
-- Check firewall rules
-- Test with `ngrok` for local development
-- Verify webhook secret matches
+### WhatsApp MCP not working
+- Verify MCP server is installed: `claude mcp list | grep whatsapp`
+- Check MCP server logs for connection issues
+- Reinstall MCP server if needed
 
 ### Rate limiting
-- Implement exponential backoff
-- Cache responses when possible
-- Use batch API endpoints
+- MCP servers handle rate limiting automatically
+- For Todoist: Built-in 500ms delays between operations
+- No manual rate limit handling needed
 
 ---
 
 ## Next Steps
 
-1. Complete credential setup for all services
-2. Run verification script
-3. Test each integration individually
-4. Configure webhooks for real-time updates
-5. Set up monitoring and alerts
+1. Set up Todoist API token (Week 8)
+2. Install Google Workspace MCP (Week 9)
+3. Install WhatsApp MCP (Week 10)
+4. Run verification script
+5. Test each integration individually
 
-For integration code examples, see `/docs/integrations/integration-architecture.md`
+**Timeline:**
+- Week 8: Todoist integration
+- Week 9: Gmail + Calendar (Google Workspace MCP)
+- Week 10: WhatsApp skill (2-3 days)
+
+For integration architecture details, see `/docs/integrations/integration-architecture.md`

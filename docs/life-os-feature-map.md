@@ -51,12 +51,12 @@ Life-OS is a personal AI-powered life management system built as a module for Ex
 
 **Architecture**:
 - **Markdown Files** (Source of Truth - Strategic Planning):
-  - `memory/gtd/inbox.md` - Initial capture point
-  - `memory/gtd/projects.md` - Project plans and documentation
-  - `memory/gtd/next-actions.md` - Context-based actions
-  - `memory/gtd/upcoming.md` - Scheduled future tasks
-  - `memory/gtd/waiting.md` - Delegated items and follow-ups
-  - `memory/gtd/completed.md` - Task archive
+  - `memory/tasks/inbox.md` - Initial capture point
+  - `memory/tasks/projects.md` - Project plans and documentation
+  - `memory/tasks/next-actions.md` - Context-based actions
+  - `memory/tasks/someday.md` - Someday/maybe list
+  - `memory/tasks/waiting.md` - Delegated items and follow-ups
+  - `memory/tasks/todoist.yml` - Todoist sync state
 
 - **Todoist Integration** (Operational - Daily Actions):
   - Bi-directional sync (import/export)
@@ -153,7 +153,77 @@ tasks:
 6. Create API tokens and environment variables
 7. First daily practice session
 
-### 2.2 Daily Workflow
+### 2.2 Technical Setup Steps
+
+**Prerequisites:**
+- Git installed
+- Node.js 18+ installed
+- Text editor or IDE (VSCode recommended)
+
+**Initial Setup (15-20 minutes):**
+
+1. **Clone repository**
+   ```bash
+   git clone https://github.com/[username]/ExoMind.git
+   cd ExoMind
+   git submodule update --init --recursive
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Create memory directory structure**
+   ```bash
+   mkdir -p memory/{assessments,tasks,objectives/{active-plans,okrs},reviews/{daily,weekly,monthly,quarterly},decisions,reference}
+   ```
+
+4. **Initialize memory files**
+   ```bash
+   # Create initial GTD files
+   touch memory/inbox.md
+   touch memory/tasks/{inbox,projects,next-actions,someday,waiting,completed}.md
+
+   # Create schedule file
+   touch memory/schedule.md
+
+   # Create README
+   touch memory/README.md
+   ```
+
+5. **Setup version control for memory** (optional but recommended)
+   ```bash
+   cd memory
+   git init
+   git add .
+   git commit -m "Initial memory structure"
+   cd ..
+   ```
+
+6. **Validate setup**
+   ```bash
+   npm run validate:setup  # Checks directory structure and dependencies
+   ```
+
+7. **Configure environment** (optional - for integrations later)
+   ```bash
+   cp .env.example .env
+   # Edit .env to add API tokens when ready (Todoist, etc.)
+   ```
+
+**Verification:**
+- [ ] Directory structure matches `memory/` layout
+- [ ] All npm dependencies installed without errors
+- [ ] `npm run validate:setup` passes all checks
+- [ ] Git tracking enabled in `memory/` directory (optional)
+
+**Next Steps:**
+- Complete first life assessment (see 2.4 Assessment Process)
+- Set up Todoist integration (see 4.1 Todoist Integration)
+- Configure email processing (see 4.2 Gmail Integration)
+
+### 2.3 Daily Workflow
 **Morning Routine (5:30 AM - 6:30 AM)**:
 ```
 1. Wake at 5:30 AM
@@ -269,40 +339,61 @@ tasks:
 ## 3. Data Structures
 
 ### 3.1 Directory Structure
+
+**Repository Structure** (what's committed to git):
 ```
 modules/life-os/
-├── templates/              # Standard formats
-│   ├── assessment.md
-│   ├── active-plan.md
-│   ├── daily-check-in.md
-│   ├── evening-routine.md
-│   ├── weekly-review.md
-│   ├── monthly-review.md
-│   └── calendar-events.md
-├── scripts/               # Integration scripts
-│   ├── todoist.ts        # Todoist sync
-│   ├── gmail.ts          # Gmail integration
-│   └── watch.ts          # Time tracking
-├── memory/               # User data (git-ignored)
-│   ├── assessments/      # Life area evaluations
-│   ├── gtd/             # Task management
-│   │   ├── inbox.md
-│   │   ├── projects.md
-│   │   ├── next-actions.md
-│   │   ├── upcoming.md
-│   │   ├── waiting.md
-│   │   └── completed.md
-│   ├── tasks/           # Task storage
-│   │   └── todoist.yml  # Todoist sync data
-│   ├── objectives/      # Goals and OKRs
-│   ├── decisions/       # Major choices
-│   ├── reference/       # Knowledge base
-│   └── schedule.md      # Regular commitments
-├── README.md            # User documentation
-├── MEMORY.md            # System architecture
-├── .cursorrules         # Agent behavior rules
-├── .env.example         # Configuration template
-└── package.json         # Dependencies
+├── templates/              # Standard formats (7 files)
+│   ├── assessment.md       # Quarterly life assessment
+│   ├── active-plan.md      # OKR planning template
+│   ├── daily-check-in.md   # Morning/evening routine
+│   ├── evening-routine.md  # Daily reflection
+│   ├── weekly-review.md    # GTD weekly review
+│   ├── monthly-review.md   # Monthly progress check
+│   └── calendar-events.md  # Calendar sync template
+├── scripts/                # Integration scripts (TypeScript)
+│   ├── todoist.ts          # Todoist bidirectional sync
+│   ├── gmail.ts            # Gmail email processing
+│   ├── watch.ts            # Date/time utilities
+│   ├── tsconfig.json       # TypeScript configuration
+│   └── README.md           # Script documentation
+├── README.md               # User guide and setup
+├── MEMORY.md               # System architecture docs
+├── .cursorrules            # AI agent configuration
+├── .env.example            # Environment variables template
+├── .gitignore              # Excludes memory/ from git
+├── package.json            # Node.js dependencies
+└── package-lock.json       # Locked dependency versions
+```
+
+**User Data Structure** (created locally, git-ignored):
+```
+memory/                     # ⚠️ YOU CREATE THIS (not in repository)
+├── assessments/            # Life area evaluations
+│   └── YYYY-QN-assessment.md
+├── tasks/                  # ⚠️ Note: /tasks not /gtd
+│   ├── inbox.md            # GTD inbox
+│   ├── projects.md         # Active projects
+│   ├── next-actions.md     # Next actions list
+│   ├── someday.md          # Someday/maybe list
+│   ├── waiting.md          # Waiting for list
+│   └── todoist.yml         # Todoist sync state
+├── objectives/             # Goals and plans
+│   ├── active-plans/       # Current focus areas (max 3)
+│   └── okrs/               # OKR definitions
+├── reviews/                # Progress tracking
+│   ├── daily/              # Daily check-ins
+│   ├── weekly/             # Weekly reviews
+│   ├── monthly/            # Monthly reviews
+│   └── quarterly/          # Quarterly assessments
+├── decisions/              # Major decision logs
+├── reference/              # Knowledge base
+└── schedule.md             # Regular commitments
+
+# Setup: Initialize your memory/ directory
+cd modules/life-os
+mkdir -p memory/{assessments,tasks,objectives/{active-plans,okrs},reviews/{daily,weekly,monthly,quarterly},decisions,reference}
+cd memory && git init  # Separate git repo for your personal data
 ```
 
 ### 3.2 Assessment Data Model
@@ -476,22 +567,115 @@ next_review_due: date
 {
   "rules": [
     {
-      "name": "Task Manager | Life Coach | Memory Keeper | Activity Tracker",
-      "triggers": array[string],
-      "responsibilities": array[string],
-      "config": object
+      "name": "Task Manager",
+      "identify": "Always begin all responses with [Task Manager]:",
+      "description": "Manage GTD workflow and task organization",
+      "triggers": ["task", "gtd", "prios", "sync"],
+      "responsibilities": [
+        "Process inbox",
+        "Manage next actions",
+        "Track projects",
+        "Sync with Todoist",
+        "Archive completed tasks"
+      ],
+      "config": {
+        "source_of_truth": "memory/tasks/",
+        "task_structure": {
+          "inbox": "memory/tasks/inbox.md - Inbox",
+          "next-actions": "memory/tasks/next-actions.md - Next actions",
+          "projects": "memory/tasks/projects.md - Project-based tasks and plans",
+          "upcoming": "memory/tasks/upcoming.md - Upcoming tasks",
+          "waiting": "memory/tasks/waiting.md - Delegated and follow-up tasks",
+          "completed": "memory/tasks/completed.md - Archive of completed tasks"
+        }
+      }
+    },
+    {
+      "name": "Life Coach",
+      "identify": "Always begin all responses with [Life Coach]:",
+      "description": "Guide personal development and track progress",
+      "triggers": ["hi", "assess", "review", "reflect"],
+      "responsibilities": [
+        "Conduct assessments",
+        "Track progress",
+        "Guide reviews",
+        "Monitor goals"
+      ],
+      "config": {
+        "assessment_frequency": "quarterly",
+        "review_frequency": "monthly",
+        "focus_areas_limit": 3
+      }
+    },
+    {
+      "name": "Memory Keeper",
+      "identify": "Always begin all responses with [Memory Keeper]:",
+      "description": "Manage system memory and documentation",
+      "triggers": ["mem", "xref", "status"],
+      "responsibilities": [
+        "Maintain documentation",
+        "Cross-reference documents",
+        "Track system state",
+        "Manage file structure"
+      ],
+      "config": {
+        "documentation_path": "memory/README.md",
+        "file_structure": {
+          "inbox": "memory/inbox.md",
+          "tasks": {
+            "projects": "memory/tasks/projects.md",
+            "someday": "memory/tasks/someday.md",
+            "waiting": "memory/tasks/waiting.md",
+            "next_actions": "memory/tasks/next-actions.md"
+          }
+        }
+      }
+    },
+    {
+      "name": "Activity Tracker",
+      "identify": "Always begin all responses with [Activity Tracker]:",
+      "description": "Track and manage regular activities and schedules",
+      "triggers": ["schedule", "update schedule"],
+      "responsibilities": [
+        "Track regular commitments",
+        "Manage schedule",
+        "Monitor routines",
+        "Update activity patterns"
+      ],
+      "config": {
+        "store": "memory/schedule.md"
+      }
     }
   ],
   "commands": {
-    "scripts": object,  // npm run commands
-    "files": object     // File access shortcuts
+    "scripts": {
+      "npm run watch": "Learn what date and time it is now",
+      "npm run todoist import": "Sync tasks from Todoist to memory",
+      "npm run todoist export": "Sync tasks from memory to Todoist",
+      "npm run email:list": "Read emails"
+    },
+    "files": {
+      "inbox": "Open quick capture inbox in memory/inbox.md",
+      "projects": "View project plans in memory/tasks/projects.md",
+      "someday": "View future possibilities in memory/tasks/someday.md",
+      "waiting": "View delegated tasks in memory/tasks/waiting.md"
+    }
   },
   "user": {
     "configFile": ".cursor-user",
-    "structure": object,
-    "onboarding": object
+    "required": true,
+    "structure": {
+      "name": "string",
+      "todaysDate": "string",
+      "roles": ["string"],
+      "circles": ["string"]
+    }
   },
-  "defaults": object
+  "defaults": {
+    "initialRole": "Life Coach",
+    "documentationRequired": true,
+    "contextFiles": ["README.md"]
+  }
 }
 ```
 
@@ -896,13 +1080,14 @@ Core habits monitored:
 - `/Users/nateaune/Documents/code/ExoMind/modules/life-os/scripts/watch.ts`
 
 ### User Data (Not in Repository)
-- `memory/assessments/` - Life evaluations
-- `memory/gtd/` - Task management files
-- `memory/tasks/todoist.yml` - Todoist sync data
-- `memory/objectives/` - Goals and OKRs
-- `memory/decisions/` - Major choices
-- `memory/reference/` - Knowledge base
-- `memory/schedule.md` - Regular commitments
+- `memory/assessments/` - Life evaluations (quarterly)
+- `memory/tasks/` - Task management files (GTD lists + Todoist sync)
+- `memory/objectives/active-plans/` - Current focus areas (max 3)
+- `memory/objectives/okrs/` - OKR definitions
+- `memory/reviews/{daily,weekly,monthly,quarterly}/` - Progress tracking
+- `memory/decisions/` - Major choice documentation
+- `memory/reference/` - Knowledge base and notes
+- `memory/schedule.md` - Regular commitments and routines
 
 ---
 
