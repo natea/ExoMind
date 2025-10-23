@@ -45,3 +45,7 @@ coverage/
 # Content
 output/
 recipes/
+
+# Environment variables
+.env
+.env.local

@@ -47,6 +47,7 @@ git submodule update --init --recursive
 **Included Submodules:**
 - `modules/superpowers` - Enhanced skills for TDD, brainstorming, debugging
 - `modules/anthropic-claude-skills` - Official Anthropic skills (documents, creative, dev)
+- `modules/ar-claude-skills` - Professional skills for C-level advisors, marketing, and product teams
 - `modules/claude-code-by-agents` - Multi-agent workspace with web UI for coordination
 - `modules/mcp-getgather` - Context gathering and web scraping
 - `modules/Skill_Seekers` - Auto-generate skills from documentation
@@ -587,6 +588,55 @@ Official example skills from Anthropic demonstrating Claude's skills system capa
 ```
 
 See [modules/anthropic-claude-skills/README.md](modules/anthropic-claude-skills/README.md) for full documentation.
+
+### [AR Claude Skills](https://github.com/natea/ar-claude-skills)
+Professional skills for C-level leadership, marketing teams, and product development.
+
+**Key Features:**
+- **C-Level Advisors** - Strategic guidance for CEOs and CTOs
+- **Marketing Skills** - Content creation, strategy, and demand generation
+- **Product Team** - Agile practices, PM frameworks, UX research, design systems
+- **Automated Symlinking** - Safe script for integrating skills into Claude Code
+
+**10 Professional Skills:**
+
+**C-Level Leadership:**
+- `ceo-advisor` - Strategic business leadership and decision-making
+- `cto-advisor` - Technical leadership and architecture guidance
+
+**Marketing:**
+- `content-creator` - Content strategy and creation workflows
+- `marketing-strategy-pmm` - Product marketing management frameworks
+- `marketing-demand-acquisition` - Demand generation and customer acquisition
+
+**Product Team:**
+- `agile-product-owner` - Agile methodologies and PO best practices
+- `product-manager-toolkit` - PM frameworks, prioritization, roadmapping
+- `product-strategist` - Product strategy and vision development
+- `ux-researcher-designer` - UX research methodologies and design
+- `ui-design-system` - Design system creation and maintenance
+
+**Quick Start:**
+```bash
+# Symlink skills into Claude Code
+./scripts/symlink-ar-skills.sh --dry-run  # Preview
+./scripts/symlink-ar-skills.sh            # Execute
+
+# Verify installation
+ls -la .claude/skills/ | grep "ar-claude-skills"
+
+# Use in Claude Code
+"Use the ceo-advisor skill to help with strategic planning"
+"Apply product-strategist skill to develop product roadmap"
+```
+
+**Script Features:**
+- ✅ Non-destructive: Never overwrites existing skills
+- ✅ Dry-run mode for safe testing
+- ✅ Relative symlink paths for portability
+- ✅ Color-coded status output
+
+See [scripts/README-symlink-ar-skills.md](scripts/README-symlink-ar-skills.md) for detailed documentation.
 
 ### [Claude Code by Agents](https://github.com/natea/claude-code-by-agents)
 Multi-agent workspace with Electron desktop app for collaborative development and task coordination.
