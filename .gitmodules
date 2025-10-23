@@ -16,3 +16,6 @@
 [submodule "modules/claude-code-by-agents"]
 	path = modules/claude-code-by-agents
 	url = https://github.com/natea/claude-code-by-agents
+[submodule "modules/ar-claude-skills"]
+	path = modules/ar-claude-skills
+	url = https://github.com/natea/ar-claude-skills

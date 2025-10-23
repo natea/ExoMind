@@ -27,7 +27,8 @@ claude-flow
 hive-mind-prompt-*.txt
 
 # MacOSX
-.DS_Store*.backup
+.DS_Store
+*.backup
 
 # NodeJS
 node_modules/
@@ -37,3 +38,10 @@ node_modules/
 !.claude/skills/.gitkeep
 .claude/skills.bak/
 .claude/skills.old/
+
+# Testing
+coverage/
+
+# Content
+output/
+recipes/
