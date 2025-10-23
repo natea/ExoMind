@@ -247,7 +247,7 @@ export function aggregateWinPatterns(weeklySummaries: WeeklySummary[]): Pattern[
  */
 export function calculateCompletionRates(
   weeklySummaries: WeeklySummary[],
-  daysInMonth: number
+  _daysInMonth: number
 ): {
   weeklyReviewRate: number;
   dailyPlanningRate: number;

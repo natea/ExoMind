@@ -274,7 +274,7 @@ export function formatQuarterlyPlanMarkdown(plan: QuarterlyGoalPlan): string {
 
 ---
 
-${plan.objectives.map((okr, i) => `${formatOKRMarkdown(okr)}\n---\n`).join("\n")}
+${plan.objectives.map((okr) => `${formatOKRMarkdown(okr)}\n---\n`).join("\n")}
 
 ## Review Schedule
 

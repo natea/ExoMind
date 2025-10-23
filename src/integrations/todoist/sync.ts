@@ -8,7 +8,6 @@ import { TodoistClient } from './client';
 import { TodoistMapper, LifeOSTask } from './mapper';
 import { ConflictResolver } from './conflict-resolver';
 import {
-  TodoistTask,
   TodoistSyncState,
   SyncConfig,
   SyncResult
@@ -29,7 +28,7 @@ export class TodoistSync {
   ) {
     this.client = new TodoistClient(config.apiToken);
     this.mapper = new TodoistMapper();
-    this.resolver = new ConflictResolver(config.conflictResolution, syncStateDirectory);
+    this.resolver = new ConflictResolver({});
     this.syncStatePath = path.join(syncStateDirectory, 'todoist-state.json');
 
     // Initialize empty sync state
@@ -252,27 +251,30 @@ export class TodoistSync {
         if (todoistId && todoistTasksMap.has(todoistId)) {
           // Task exists in both - check for conflicts
           const remoteTask = todoistTasksMap.get(todoistId)!;
-          const hasConflict = await this.detectConflict(localTask, remoteTask);
+          const conflict = this.resolver.detectConflict(localTask, remoteTask);
 
-          if (hasConflict) {
-            // Resolve conflict
-            const resolution = await this.resolver.resolveConflict(
-              localTask,
-              remoteTask,
-              this.config.conflictResolution
-            );
-            resolvedTasks.push(resolution.resolvedTask);
-            tasksToSync.push(resolution.resolvedTask);
+          if (conflict) {
+            // Resolve conflict - map from ConflictResolutionStrategy to ResolutionStrategy
+            const strategyMap: Record<string, any> = {
+              'local-wins': 'local-wins',
+              'remote-wins': 'remote-wins',
+              'most-recent': 'latest-timestamp',
+              'manual': 'latest-timestamp'
+            };
+            const strategy = strategyMap[this.config.conflictResolution] || 'latest-timestamp';
+            const resolvedTask = this.resolver.resolve(conflict, strategy);
+            resolvedTasks.push(resolvedTask);
+            tasksToSync.push(resolvedTask);
             result.stats.conflicts++;
 
             result.conflicts?.push({
               taskId: localTask.id,
               localTask,
               remoteTask,
-              localModified: localTask.updatedAt,
+              localModified: localTask.updatedAt.toISOString(),
               remoteModified: remoteTask.created_at,
               conflictType: 'content',
-              resolution: resolution.strategy
+              resolution: this.config.conflictResolution
             });
           } else {
             // No conflict, use local version
@@ -370,26 +372,10 @@ export class TodoistSync {
     console.log(`Updated task in Todoist: ${localTask.title} (${todoistId})`);
   }
 
-  /**
-   * Detect if there's a conflict between local and remote task
-   */
-  private async detectConflict(
-    localTask: LifeOSTask,
-    remoteTask: TodoistTask
-  ): Promise<boolean> {
-    const remoteAsLocal = this.mapper.fromTodoistTask(remoteTask, localTask.id);
-
-    // Compare key fields
-    const hasContentChange =
-      localTask.title !== remoteAsLocal.title ||
-      localTask.description !== remoteAsLocal.description;
-
-    const hasStatusChange = localTask.status !== remoteAsLocal.status;
-    const hasPriorityChange = localTask.priority !== remoteAsLocal.priority;
-    const hasDueDateChange = localTask.dueDate !== remoteAsLocal.dueDate;
-
-    return hasContentChange || hasStatusChange || hasPriorityChange || hasDueDateChange;
-  }
+  // Note: detectConflict is now handled by ConflictResolver.detectConflict()
+  // The old implementation is preserved here for reference if needed:
+  // private async detectConflict(localTask, remoteTask): Promise<boolean>
+  // Returns boolean whether there are differences between local and remote tasks
 
   /**
    * Handle tasks that were deleted locally
