@@ -19,3 +19,12 @@
 [submodule "modules/ar-claude-skills"]
 	path = modules/ar-claude-skills
 	url = https://github.com/natea/ar-claude-skills
+[submodule "modules/notebooklm-skill"]
+	path = modules/notebooklm-skill
+	url = https://github.com/natea/notebooklm-skill.git
+[submodule "modules/magic-patterns-mcp"]
+	path = modules/magic-patterns-mcp
+	url = https://github.com/natea/magic-patterns-mcp.git
+[submodule "modules/private-journal-mcp"]
+	path = modules/private-journal-mcp
+	url = https://github.com/natea/private-journal-mcp
